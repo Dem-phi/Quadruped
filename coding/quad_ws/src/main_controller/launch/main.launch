@@ -1,0 +1,9 @@
+<launch>
+
+    <node pkg="main_controller" type="demo" name="demo" output="screen">
+    </node>
+
+    <node pkg="main_controller" type="remap" name="remap" output="screen">
+
+    </node>
+</launch>

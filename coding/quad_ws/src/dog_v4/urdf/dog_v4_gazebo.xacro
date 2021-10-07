@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<!--created by your dad ,holmes-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:macro name="link_gazebo" params="name color">
+        <gazebo reference="${name}_link">
+            <material>Gazebo/${color}</material>
+            <mu1>10</mu1>
+            <mu2>10</mu2>
+        </gazebo>
+    </xacro:macro>
+
+    <xacro:macro name="link_leg_gazebo" params="name color">
+        <gazebo reference="${name}_link">
+            <material>Gazebo/${color}</material>
+            <mu1>100000</mu1>
+            <mu2>100000</mu2>
+        </gazebo>
+    </xacro:macro>
+
+    <xacro:link_gazebo name="body" color="SkyBlue"/>
+
+    <xacro:link_gazebo name="LF_top" color="Red"/>
+    
+    <xacro:link_gazebo name="LF_mid" color="Red"/>
+
+    <xacro:link_leg_gazebo name="LF_down" color="Red"/>
+
+    <xacro:link_gazebo name="RF_top" color="Green"/>
+
+    <xacro:link_gazebo name="RF_mid" color="Green"/>
+
+    <xacro:link_leg_gazebo name="RF_down" color="Green"/>
+
+    <xacro:link_gazebo name="LB_top" color="Yellow"/>
+
+    <xacro:link_gazebo name="LB_mid" color="Yellow"/>
+
+    <xacro:link_leg_gazebo name="LB_down" color="Yellow"/>
+
+    <xacro:link_gazebo name="RB_top" color="Orange"/>
+
+    <xacro:link_gazebo name="RB_mid" color="Orange"/>
+
+    <xacro:link_leg_gazebo name="RB_down" color="Orange"/>
+
+    <gazebo>
+        <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+            <robotNamespace>/dog_v4</robotNamespace>
+            <!-- <robotNamespace>: The ROS namespace to be used for this instance of the plugin, defaults to robot name in URDF/SDF -->
+            <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+            <!--By default, without a <robotSimType> tag, gazebo_ros_control will attempt to get all of the information it needs to interface with a ros_control-based controller out of the URDF. -->
+        </plugin>
+    </gazebo>
+
+
+</robot>
