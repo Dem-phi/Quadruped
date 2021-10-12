@@ -23,6 +23,8 @@ reference/common_include.h
 ../include/MathTools/Hopf.h
 reference/common_include.h
 ../include/MathTools/reference/common_include.h
+math.h
+../include/MathTools/math.h
 
 ../include/StateWorkerInclude/GallopWorker.h
 CAR.h

@@ -9,26 +9,24 @@
 
 /**
   * @param beta -> duty cycle
-  * @param phi  -> phase position of Right Hind
+  * @param phi  -> phase position of Light Hind
   */
 namespace quad{
-/*    enum beta{
-        walk_beta,   // 0.75
-        trot_beta,   // 0.5
-        pace_beta,   // 0.5
-        gallop_beta  // 0.5
-    }beta;*/
+    const float WALK_BETA = 0.75;
+    const float TROT_BETA = 0.5;
+    const float PACE_BETA = 0.5;
+    const float GALLOP_BETA = 0.5;
 
-    Vec4f beta = {0.75, 0.5, 0.5, 0.5};
+    // rad to deg -> deg = rad * Rad2Deg
+    // deg to rad -> rad = deg / Rad2Deg
+    const double Rad2Deg = 45.0/ atan(1);
 
-/*    enum phi{
-        walk_phi,    // 0.25,
-        trot_phi,    // 0,
-        pace_phi,    // 0.5,
-        gallop_phi   // 0.5,
-    };*/
-    Vec4f phi = {0.25, 0.0, 0.5, 0.5};
-    float DEFAULT_SHOULD_ANGLE = 10.0;
+    const Eigen::Vector4f WALK_PHI = {0, 0.5, 0.25, 0.75};
+    const Eigen::Vector4f TROT_PHI = {0, 0.5, 0, 0.5};
+    const Eigen::Vector4f PACE_PHI = {0, 0.5, 0.5, 0};
+    const Eigen::Vector4f GALLOP_PHI = {0, 0, 0.5, 0.5};
+
+    const float DEFAULT_SHOULD_ANGLE = 10.0;
 
 
 }
