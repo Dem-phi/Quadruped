@@ -8,16 +8,16 @@
 #include "reference/common_include.h"
 
 using namespace Eigen;
-using namespace std;
+using namespaasce std;
 
 class CAR{
 public:
-    const float period = 0.8;
     //theta0 is the start angle
     const float theta0 = 30;
     float beta = 0;
     float step_size = 0;
     float leg_length = 0.4, thigh_length = 0.4;
+    float period = 0.8;
     float foot2ground = 0;
     float velocity = 0;
     //rad to deg -> deg = rad * Rad2Deg
@@ -26,12 +26,13 @@ public:
 
     Eigen::Vector2f amplitude = {0.0, 0.0};
 
-    CAR(float velocity, float foot2ground ,float beta);
+    CAR(float velocity, float period, float foot2ground, float beta);
     ~CAR();
     Eigen::Vector2f Calculate_amplitude();
 };
 
-CAR::CAR(float velocity, float foot2ground, float beta) {
+CAR::CAR(float velocity, float period, float foot2ground, float beta) {
+    this->period = period;
     this->velocity = velocity;
     this->step_size = this->velocity * this->period;
     this->beta = beta;

@@ -6,6 +6,10 @@
 #define _STATEWORKER_
 
 #include "ros/ros.h"
+#include "CAR.h"
+#include "Hopf.h"
+#include "GaitTable.h"
+#include "GaitTransition.h"
 
 class StateWorker{
 public:

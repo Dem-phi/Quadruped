@@ -68,23 +68,27 @@ void FSM::build_ScheduleTable(int Schedule, ...) {
             }
             case quad::WALK:{
                 float velocity = va_arg(arg_ptr, double);
-                WalkWorker* tmp_Worker = new WalkWorker(this->nh);
+                WalkWorker* tmp_Worker = new WalkWorker(this->nh, velocity);
                 this->Workers.push_back((StateWorker *)tmp_Worker);
                 break;
             }
             case quad::TROT:{
+                float velocity = va_arg(arg_ptr, double);
                 TrotWorker* tmp_Worker = new TrotWorker(this->nh);
                 this->Workers.push_back((StateWorker *)tmp_Worker);
                 break;
             }
             case quad::PACE:{
+                float velocity = va_arg(arg_ptr, double);
                 PaceWorker* tmp_Worker = new PaceWorker(this->nh);
                 this->Workers.push_back((StateWorker *)tmp_Worker);
                 break;
             }
             case quad::GALLOP:{
+                float velocity = va_arg(arg_ptr, double);
                 GallopWorker* tmp_Worker = new GallopWorker(this->nh);
                 this->Workers.push_back((StateWorker* )tmp_Worker);
+                break;
             }
             default:
                 ROS_ERROR("Wrong type of Schedule Table");

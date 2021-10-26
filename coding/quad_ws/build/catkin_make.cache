@@ -1,0 +1,2 @@
+dog_v4:main_controller
+-DCATKIN_DEVEL_PREFIX=/home/demphi/ros/quad_ws/devel -DCMAKE_INSTALL_PREFIX=/home/demphi/ros/quad_ws/install -G Unix Makefiles

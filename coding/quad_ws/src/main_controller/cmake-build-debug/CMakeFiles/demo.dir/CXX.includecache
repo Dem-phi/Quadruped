@@ -27,10 +27,6 @@ math.h
 ../include/MathTools/math.h
 
 ../include/StateWorkerInclude/GallopWorker.h
-CAR.h
-../include/StateWorkerInclude/CAR.h
-GaitTable.h
-../include/StateWorkerInclude/GaitTable.h
 
 ../include/StateWorkerInclude/PaceWorker.h
 

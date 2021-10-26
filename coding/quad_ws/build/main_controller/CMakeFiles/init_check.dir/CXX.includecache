@@ -1,0 +1,14 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/demphi/ros/quad_ws/src/main_controller/App/InitCheck.cpp
+InitCheck.h
+/home/demphi/ros/quad_ws/src/main_controller/App/InitCheck.h
+
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/InitCheck.h
+

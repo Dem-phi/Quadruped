@@ -6,13 +6,10 @@
 #define _WALKWORKER_
 
 #include "StateWorker.h"
-#include "CAR.h"
-#include "Hopf.h"
-#include "GaitTable.h"
 
 /**
- * @brief
- * @param
+ * @brief Walk state
+ * @param input none
  */
 class WalkWorker:public StateWorker{
 public:
@@ -20,7 +17,7 @@ public:
     ros::Publisher pub_angle;
     std_msgs::Float64MultiArray msg_angle;
 
-    CAR* model_CAR = new CAR(0.3, 0.02, quad::WALK_BETA);
+    CAR* model_CAR = new CAR(0.3, 0.8, 0.02, quad::WALK_BETA);
     GaitTable* walk_table = new GaitTable();
     Hopf* model_Hopf = new Hopf({7.4, 5.3}, quad::WALK_BETA, quad::WALK_PHI);
     Eigen::Vector2f amplitude;
@@ -28,11 +25,11 @@ public:
     virtual void run();
     virtual bool is_finished();
 
-    WalkWorker(ros::NodeHandle &nh);
+    WalkWorker(ros::NodeHandle &nh, float velocity);
     ~WalkWorker();
 };
 
-WalkWorker::WalkWorker(ros::NodeHandle &nh) {
+WalkWorker::WalkWorker(ros::NodeHandle &nh, float velocity) {
     this->nh = nh;
     this->pub_angle = this->nh.advertise<std_msgs::Float64MultiArray>(
             "/quad/set_angle", 1);
