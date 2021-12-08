@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/demphi/ros/quad_ws/src/state_estimate/cmake-build-debug/devel/setup.sh

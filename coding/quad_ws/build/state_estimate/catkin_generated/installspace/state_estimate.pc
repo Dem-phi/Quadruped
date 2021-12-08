@@ -1,0 +1,8 @@
+prefix=/home/demphi/ros/quad_ws/install
+
+Name: state_estimate
+Description: Description of state_estimate
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

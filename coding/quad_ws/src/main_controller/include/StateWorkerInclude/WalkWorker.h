@@ -12,10 +12,16 @@
  * @param input none
  */
 class WalkWorker:public StateWorker{
+private:
+    ros::Publisher angle_gazebo_pub_, angle_real_pub_;
+
 public:
-    ros::NodeHandle nh;
-    ros::Publisher pub_angle;
-    std_msgs::Float64MultiArray msg_angle;
+    ros::NodeHandle nh_;
+
+    std_msgs::Float64MultiArray angle_gazebo_data_;
+
+    std_msgs::Float64MultiArray angle_real_data_;
+
 
     CAR* model_CAR = new CAR(0.3, 0.8, 0.02, quad::WALK_BETA);
     GaitTable* walk_table = new GaitTable();
@@ -30,12 +36,16 @@ public:
 };
 
 WalkWorker::WalkWorker(ros::NodeHandle &nh, float velocity) {
-    this->nh = nh;
-    this->pub_angle = this->nh.advertise<std_msgs::Float64MultiArray>(
+    this->nh_ = nh;
+    this->angle_gazebo_pub_ = this->nh_.advertise<std_msgs::Float64MultiArray>(
+            "/quad/set_angle_gazebo", 1);
+    this->angle_real_pub_ = this->nh_.advertise<std_msgs::Float64MultiArray>(
             "/quad/set_angle", 1);
     this->amplitude = model_CAR->Calculate_amplitude();
-    //init
-    this->msg_angle.data.resize(12);
+
+    /*! Init some param*/
+    this->angle_gazebo_data_.data.resize(12);
+    this->angle_real_data_.data.resize(3);
 
 }
 
@@ -48,9 +58,18 @@ WalkWorker::~WalkWorker() {
 void WalkWorker::run() {
     ROS_INFO("Walking");
     //cout << amplitude.x() << "   " << amplitude.y() << endl;
-    this->msg_angle = model_Hopf->CalculateAngle(this->msg_angle);
+    /*! LF should->hip->knee (0, 1, 2)*/
+    this->angle_gazebo_data_ = model_Hopf->CalculateAngle(this->angle_gazebo_data_);
 //    msg_angle.data = walk_table->Get_Angle_From_Table().data;
-    pub_angle.publish(msg_angle);
+
+    /*! pub to low computer */
+    this->angle_real_data_.data[0] = 0;
+    this->angle_real_data_.data[1] = this->angle_gazebo_data_.data[1];
+    this->angle_real_data_.data[2] = this->angle_gazebo_data_.data[2];
+    this->angle_real_pub_.publish(this->angle_real_data_);
+
+    /*! pub to gazebo */
+    this->angle_gazebo_pub_.publish(this->angle_gazebo_data_);
 }
 
 bool WalkWorker::is_finished() {

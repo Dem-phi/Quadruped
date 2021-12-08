@@ -12,6 +12,8 @@
   * @param phi  -> phase position of Light Hind
   */
 namespace quad{
+    const double SAFETY_TOLERANCE = 10.0;
+
     const float WALK_BETA = 0.75;
     const float TROT_BETA = 0.5;
     const float PACE_BETA = 0.5;
@@ -26,7 +28,10 @@ namespace quad{
     const Eigen::Vector4f PACE_PHI = {0, 0.5, 0.5, 0};
     const Eigen::Vector4f GALLOP_PHI = {0, 0, 0.5, 0.5};
 
-    const float DEFAULT_SHOULD_ANGLE = 10.0;
+    const double DEFAULT_SHOULD_ANGLE = 10.0;
+
+    const double HIP_ANGLE_OFFSET = 45.0;
+    const double KNEE_ANGLE_OFFSET = 0.0;
 
 
 }

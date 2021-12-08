@@ -38,7 +38,7 @@ void angle_Callback(const std_msgs::Float64MultiArrayConstPtr &msg){
 int main (int argc, char** argv){
     ros::init(argc, argv, "remap");
     ros::NodeHandle nh;
-    angle_sub = nh.subscribe("/quad/set_angle", 1, angle_Callback);
+    angle_sub = nh.subscribe("/quad/set_angle_gazebo", 1, angle_Callback);
     remap[0] = nh.advertise<std_msgs::Float64>("/dog_v4/LF_top_position_controller/command", 1);
     remap[1] = nh.advertise<std_msgs::Float64>("/dog_v4/LF_mid_position_controller/command", 1);
     remap[2] = nh.advertise<std_msgs::Float64>("/dog_v4/LF_down_position_controller/command", 1);

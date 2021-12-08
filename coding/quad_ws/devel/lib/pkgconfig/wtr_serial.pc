@@ -1,0 +1,8 @@
+prefix=/home/demphi/ros/quad_ws/devel
+
+Name: wtr_serial
+Description: Description of wtr_serial
+Version: 0.0.0
+Cflags: -I/home/demphi/ros/quad_ws/devel/include
+Libs: -L${prefix}/lib 
+Requires: 

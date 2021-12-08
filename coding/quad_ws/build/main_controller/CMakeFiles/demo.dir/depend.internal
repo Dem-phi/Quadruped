@@ -5,8 +5,10 @@ main_controller/CMakeFiles/demo.dir/src/demo.cpp.o
  /home/demphi/ros/quad_ws/src/main_controller/include/FiniteStateMachine.h
  /home/demphi/ros/quad_ws/src/main_controller/include/MathTools/CAR.h
  /home/demphi/ros/quad_ws/src/main_controller/include/MathTools/GaitTable.h
+ /home/demphi/ros/quad_ws/src/main_controller/include/MathTools/GaitTransition.h
  /home/demphi/ros/quad_ws/src/main_controller/include/MathTools/Hopf.h
  /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/GallopWorker.h
+ /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/InitCheck.h
  /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/PaceWorker.h
  /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/StandWorker.h
  /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/StateWorker.h

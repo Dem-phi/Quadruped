@@ -36,7 +36,7 @@ TrotWorker::~TrotWorker() {
 
 void TrotWorker::run() {
     ROS_INFO("Trotting");
-    cout << amplitude.x() << "   " << amplitude.y() << endl;
+    std::cout << amplitude.x() << "   " << amplitude.y() << std::endl;
 }
 
 bool TrotWorker::is_finished() {

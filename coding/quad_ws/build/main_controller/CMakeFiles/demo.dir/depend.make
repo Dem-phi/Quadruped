@@ -4,8 +4,10 @@
 main_controller/CMakeFiles/demo.dir/src/demo.cpp.o: /home/demphi/ros/quad_ws/src/main_controller/include/FiniteStateMachine.h
 main_controller/CMakeFiles/demo.dir/src/demo.cpp.o: /home/demphi/ros/quad_ws/src/main_controller/include/MathTools/CAR.h
 main_controller/CMakeFiles/demo.dir/src/demo.cpp.o: /home/demphi/ros/quad_ws/src/main_controller/include/MathTools/GaitTable.h
+main_controller/CMakeFiles/demo.dir/src/demo.cpp.o: /home/demphi/ros/quad_ws/src/main_controller/include/MathTools/GaitTransition.h
 main_controller/CMakeFiles/demo.dir/src/demo.cpp.o: /home/demphi/ros/quad_ws/src/main_controller/include/MathTools/Hopf.h
 main_controller/CMakeFiles/demo.dir/src/demo.cpp.o: /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/GallopWorker.h
+main_controller/CMakeFiles/demo.dir/src/demo.cpp.o: /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/InitCheck.h
 main_controller/CMakeFiles/demo.dir/src/demo.cpp.o: /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/PaceWorker.h
 main_controller/CMakeFiles/demo.dir/src/demo.cpp.o: /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/StandWorker.h
 main_controller/CMakeFiles/demo.dir/src/demo.cpp.o: /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/StateWorker.h

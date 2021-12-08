@@ -583,6 +583,175 @@ _catkin_empty_exported_target/fast:
 	$(MAKE) -f dog_v4/CMakeFiles/_catkin_empty_exported_target.dir/build.make dog_v4/CMakeFiles/_catkin_empty_exported_target.dir/build
 .PHONY : _catkin_empty_exported_target/fast
 
+#=============================================================================
+# Target rules for targets named wtr_serial_generate_messages_nodejs
+
+# Build rule for target.
+wtr_serial_generate_messages_nodejs: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 wtr_serial_generate_messages_nodejs
+.PHONY : wtr_serial_generate_messages_nodejs
+
+# fast build rule for target.
+wtr_serial_generate_messages_nodejs/fast:
+	$(MAKE) -f wtr-serial/CMakeFiles/wtr_serial_generate_messages_nodejs.dir/build.make wtr-serial/CMakeFiles/wtr_serial_generate_messages_nodejs.dir/build
+.PHONY : wtr_serial_generate_messages_nodejs/fast
+
+#=============================================================================
+# Target rules for targets named wtr_serial_gencpp
+
+# Build rule for target.
+wtr_serial_gencpp: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 wtr_serial_gencpp
+.PHONY : wtr_serial_gencpp
+
+# fast build rule for target.
+wtr_serial_gencpp/fast:
+	$(MAKE) -f wtr-serial/CMakeFiles/wtr_serial_gencpp.dir/build.make wtr-serial/CMakeFiles/wtr_serial_gencpp.dir/build
+.PHONY : wtr_serial_gencpp/fast
+
+#=============================================================================
+# Target rules for targets named wtr_serial_generate_messages_cpp
+
+# Build rule for target.
+wtr_serial_generate_messages_cpp: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 wtr_serial_generate_messages_cpp
+.PHONY : wtr_serial_generate_messages_cpp
+
+# fast build rule for target.
+wtr_serial_generate_messages_cpp/fast:
+	$(MAKE) -f wtr-serial/CMakeFiles/wtr_serial_generate_messages_cpp.dir/build.make wtr-serial/CMakeFiles/wtr_serial_generate_messages_cpp.dir/build
+.PHONY : wtr_serial_generate_messages_cpp/fast
+
+#=============================================================================
+# Target rules for targets named wtr_serial_geneus
+
+# Build rule for target.
+wtr_serial_geneus: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 wtr_serial_geneus
+.PHONY : wtr_serial_geneus
+
+# fast build rule for target.
+wtr_serial_geneus/fast:
+	$(MAKE) -f wtr-serial/CMakeFiles/wtr_serial_geneus.dir/build.make wtr-serial/CMakeFiles/wtr_serial_geneus.dir/build
+.PHONY : wtr_serial_geneus/fast
+
+#=============================================================================
+# Target rules for targets named wtr_serial_gennodejs
+
+# Build rule for target.
+wtr_serial_gennodejs: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 wtr_serial_gennodejs
+.PHONY : wtr_serial_gennodejs
+
+# fast build rule for target.
+wtr_serial_gennodejs/fast:
+	$(MAKE) -f wtr-serial/CMakeFiles/wtr_serial_gennodejs.dir/build.make wtr-serial/CMakeFiles/wtr_serial_gennodejs.dir/build
+.PHONY : wtr_serial_gennodejs/fast
+
+#=============================================================================
+# Target rules for targets named main
+
+# Build rule for target.
+main: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 main
+.PHONY : main
+
+# fast build rule for target.
+main/fast:
+	$(MAKE) -f wtr-serial/CMakeFiles/main.dir/build.make wtr-serial/CMakeFiles/main.dir/build
+.PHONY : main/fast
+
+#=============================================================================
+# Target rules for targets named _wtr_serial_generate_messages_check_deps_actor_1
+
+# Build rule for target.
+_wtr_serial_generate_messages_check_deps_actor_1: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 _wtr_serial_generate_messages_check_deps_actor_1
+.PHONY : _wtr_serial_generate_messages_check_deps_actor_1
+
+# fast build rule for target.
+_wtr_serial_generate_messages_check_deps_actor_1/fast:
+	$(MAKE) -f wtr-serial/CMakeFiles/_wtr_serial_generate_messages_check_deps_actor_1.dir/build.make wtr-serial/CMakeFiles/_wtr_serial_generate_messages_check_deps_actor_1.dir/build
+.PHONY : _wtr_serial_generate_messages_check_deps_actor_1/fast
+
+#=============================================================================
+# Target rules for targets named wtr_serial_generate_messages
+
+# Build rule for target.
+wtr_serial_generate_messages: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 wtr_serial_generate_messages
+.PHONY : wtr_serial_generate_messages
+
+# fast build rule for target.
+wtr_serial_generate_messages/fast:
+	$(MAKE) -f wtr-serial/CMakeFiles/wtr_serial_generate_messages.dir/build.make wtr-serial/CMakeFiles/wtr_serial_generate_messages.dir/build
+.PHONY : wtr_serial_generate_messages/fast
+
+#=============================================================================
+# Target rules for targets named wtr_serial_generate_messages_lisp
+
+# Build rule for target.
+wtr_serial_generate_messages_lisp: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 wtr_serial_generate_messages_lisp
+.PHONY : wtr_serial_generate_messages_lisp
+
+# fast build rule for target.
+wtr_serial_generate_messages_lisp/fast:
+	$(MAKE) -f wtr-serial/CMakeFiles/wtr_serial_generate_messages_lisp.dir/build.make wtr-serial/CMakeFiles/wtr_serial_generate_messages_lisp.dir/build
+.PHONY : wtr_serial_generate_messages_lisp/fast
+
+#=============================================================================
+# Target rules for targets named wtr_serial_generate_messages_eus
+
+# Build rule for target.
+wtr_serial_generate_messages_eus: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 wtr_serial_generate_messages_eus
+.PHONY : wtr_serial_generate_messages_eus
+
+# fast build rule for target.
+wtr_serial_generate_messages_eus/fast:
+	$(MAKE) -f wtr-serial/CMakeFiles/wtr_serial_generate_messages_eus.dir/build.make wtr-serial/CMakeFiles/wtr_serial_generate_messages_eus.dir/build
+.PHONY : wtr_serial_generate_messages_eus/fast
+
+#=============================================================================
+# Target rules for targets named wtr_serial_genlisp
+
+# Build rule for target.
+wtr_serial_genlisp: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 wtr_serial_genlisp
+.PHONY : wtr_serial_genlisp
+
+# fast build rule for target.
+wtr_serial_genlisp/fast:
+	$(MAKE) -f wtr-serial/CMakeFiles/wtr_serial_genlisp.dir/build.make wtr-serial/CMakeFiles/wtr_serial_genlisp.dir/build
+.PHONY : wtr_serial_genlisp/fast
+
+#=============================================================================
+# Target rules for targets named wtr_serial_generate_messages_py
+
+# Build rule for target.
+wtr_serial_generate_messages_py: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 wtr_serial_generate_messages_py
+.PHONY : wtr_serial_generate_messages_py
+
+# fast build rule for target.
+wtr_serial_generate_messages_py/fast:
+	$(MAKE) -f wtr-serial/CMakeFiles/wtr_serial_generate_messages_py.dir/build.make wtr-serial/CMakeFiles/wtr_serial_generate_messages_py.dir/build
+.PHONY : wtr_serial_generate_messages_py/fast
+
+#=============================================================================
+# Target rules for targets named wtr_serial_genpy
+
+# Build rule for target.
+wtr_serial_genpy: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 wtr_serial_genpy
+.PHONY : wtr_serial_genpy
+
+# fast build rule for target.
+wtr_serial_genpy/fast:
+	$(MAKE) -f wtr-serial/CMakeFiles/wtr_serial_genpy.dir/build.make wtr-serial/CMakeFiles/wtr_serial_genpy.dir/build
+.PHONY : wtr_serial_genpy/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -628,6 +797,19 @@ help:
 	@echo "... roscpp_generate_messages_nodejs"
 	@echo "... std_msgs_generate_messages_py"
 	@echo "... _catkin_empty_exported_target"
+	@echo "... wtr_serial_generate_messages_nodejs"
+	@echo "... wtr_serial_gencpp"
+	@echo "... wtr_serial_generate_messages_cpp"
+	@echo "... wtr_serial_geneus"
+	@echo "... wtr_serial_gennodejs"
+	@echo "... main"
+	@echo "... _wtr_serial_generate_messages_check_deps_actor_1"
+	@echo "... wtr_serial_generate_messages"
+	@echo "... wtr_serial_generate_messages_lisp"
+	@echo "... wtr_serial_generate_messages_eus"
+	@echo "... wtr_serial_genlisp"
+	@echo "... wtr_serial_generate_messages_py"
+	@echo "... wtr_serial_genpy"
 .PHONY : help
 
 

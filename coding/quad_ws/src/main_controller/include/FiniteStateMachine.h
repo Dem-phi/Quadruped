@@ -10,13 +10,17 @@
 
 class FSM{
 private:
-    // main loop function runs in a specific frequency
-    ros::Timer FSM_Timer;
+    /*! main loop function runs in a specific frequency */
+    ros::Timer FSM_Timer_;
+
+    ros::Subscriber motor_sub_;
 
 public:
-    ros::NodeHandle nh;
-    vector<StateWorker*> Workers;
+    ros::NodeHandle nh_;
+    std::vector<StateWorker*> Workers;
     int flow = 0;
+
+    quad::STATE_INFO state_info_;
 
     FSM(ros::NodeHandle &nh);
     ~FSM();
@@ -24,11 +28,20 @@ public:
     void set_timer();
     void build_ScheduleTable(int Schedule, ...);
 
+    /*! Callback Function */
+    void MotorCallback(const std_msgs::Float64MultiArray &msg);
+
 
 };
 
 FSM::FSM(ros::NodeHandle &nh) {
-    this->nh = nh;
+    this->nh_ = nh;
+    this->motor_sub_ = this->nh_.subscribe("/quad/motor_info", 1000, &FSM::MotorCallback ,this);
+
+    /*! Init some param */
+    this->state_info_.position_feedback_info.data.resize(12);
+    this->state_info_.velocity_feedback_info.data.resize(12);
+    this->state_info_.current_feedback_info.data.resize(12);
 }
 
 FSM::~FSM() {
@@ -53,7 +66,7 @@ void FSM::loop(const ros::TimerEvent &) {
 }
 
 void FSM::set_timer() {
-    this->FSM_Timer = nh.createTimer(ros::Duration(0.01), &FSM::loop, this);
+    this->FSM_Timer_ = this->nh_.createTimer(ros::Duration(0.02), &FSM::loop, this);
 }
 
 void FSM::build_ScheduleTable(int Schedule, ...) {
@@ -62,31 +75,31 @@ void FSM::build_ScheduleTable(int Schedule, ...) {
     while(Schedule != quad::END){
         switch (Schedule) {
             case quad::STAND:{
-                StandWorker* tmp_Worker = new StandWorker(this->nh);
+                StandWorker* tmp_Worker = new StandWorker(this->nh_);
                 this->Workers.push_back((StateWorker *)tmp_Worker);
                 break;
             }
             case quad::WALK:{
                 float velocity = va_arg(arg_ptr, double);
-                WalkWorker* tmp_Worker = new WalkWorker(this->nh, velocity);
+                WalkWorker* tmp_Worker = new WalkWorker(this->nh_, velocity);
                 this->Workers.push_back((StateWorker *)tmp_Worker);
                 break;
             }
             case quad::TROT:{
                 float velocity = va_arg(arg_ptr, double);
-                TrotWorker* tmp_Worker = new TrotWorker(this->nh);
+                TrotWorker* tmp_Worker = new TrotWorker(this->nh_);
                 this->Workers.push_back((StateWorker *)tmp_Worker);
                 break;
             }
             case quad::PACE:{
                 float velocity = va_arg(arg_ptr, double);
-                PaceWorker* tmp_Worker = new PaceWorker(this->nh);
+                PaceWorker* tmp_Worker = new PaceWorker(this->nh_);
                 this->Workers.push_back((StateWorker *)tmp_Worker);
                 break;
             }
             case quad::GALLOP:{
                 float velocity = va_arg(arg_ptr, double);
-                GallopWorker* tmp_Worker = new GallopWorker(this->nh);
+                GallopWorker* tmp_Worker = new GallopWorker(this->nh_);
                 this->Workers.push_back((StateWorker* )tmp_Worker);
                 break;
             }
@@ -98,6 +111,10 @@ void FSM::build_ScheduleTable(int Schedule, ...) {
         Schedule = va_arg(arg_ptr, int);
     }
     return;
+}
+
+void FSM::MotorCallback(const std_msgs::Float64MultiArray &msg) {
+
 }
 
 

@@ -41,7 +41,7 @@ PaceWorker::~PaceWorker() {
 
 void PaceWorker::run() {
     ROS_INFO("Pacing");
-    cout << amplitude.x() << "   " << amplitude.y() << endl;
+    std::cout << amplitude.x() << "   " << amplitude.y() << std::endl;
 }
 
 bool PaceWorker::is_finished(){

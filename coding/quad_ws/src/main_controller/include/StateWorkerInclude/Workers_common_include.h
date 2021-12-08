@@ -7,6 +7,7 @@
 
 #include "common_defination.h"
 #include "common_parameter.h"
+#include "InitCheck.h"
 #include "StandWorker.h"
 #include "WalkWorker.h"
 #include "TrotWorker.h"

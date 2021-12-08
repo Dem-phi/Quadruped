@@ -8,7 +8,7 @@
 #include "reference/common_include.h"
 
 using namespace Eigen;
-using namespaasce std;
+using namespace std;
 
 class CAR{
 public:

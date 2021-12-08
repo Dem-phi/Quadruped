@@ -20,6 +20,10 @@ reference/common_include.h
 reference/common_include.h
 /home/demphi/ros/quad_ws/src/main_controller/include/MathTools/reference/common_include.h
 
+/home/demphi/ros/quad_ws/src/main_controller/include/MathTools/GaitTransition.h
+reference/common_include.h
+/home/demphi/ros/quad_ws/src/main_controller/include/MathTools/reference/common_include.h
+
 /home/demphi/ros/quad_ws/src/main_controller/include/MathTools/Hopf.h
 reference/common_include.h
 /home/demphi/ros/quad_ws/src/main_controller/include/MathTools/reference/common_include.h
@@ -27,28 +31,14 @@ math.h
 /home/demphi/ros/quad_ws/src/main_controller/include/MathTools/math.h
 
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/GallopWorker.h
-CAR.h
-/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/CAR.h
-GaitTable.h
-/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/GaitTable.h
+
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/InitCheck.h
+StandWorker.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/StandWorker.h
+std_msgs/Float64MultiArray.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/std_msgs/Float64MultiArray.h
 
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/PaceWorker.h
-
-/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/StandWorker.h
-StateWorker.h
-/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/StateWorker.h
-geometry_msgs/Vector3.h
-/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/geometry_msgs/Vector3.h
-
-/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/StateWorker.h
-ros/ros.h
-/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/ros/ros.h
-
-/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/TrotWorker.h
-
-/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/WalkWorker.h
-StateWorker.h
-/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/StateWorker.h
 CAR.h
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/CAR.h
 Hopf.h
@@ -56,11 +46,39 @@ Hopf.h
 GaitTable.h
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/GaitTable.h
 
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/StandWorker.h
+StateWorker.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/StateWorker.h
+geometry_msgs/Vector3.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/geometry_msgs/Vector3.h
+std_msgs/Float64MultiArray.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/std_msgs/Float64MultiArray.h
+
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/StateWorker.h
+ros/ros.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/ros/ros.h
+CAR.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/CAR.h
+Hopf.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/Hopf.h
+GaitTable.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/GaitTable.h
+GaitTransition.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/GaitTransition.h
+
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/TrotWorker.h
+
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/WalkWorker.h
+StateWorker.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/StateWorker.h
+
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/Workers_common_include.h
 common_defination.h
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/common_defination.h
 common_parameter.h
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/common_parameter.h
+InitCheck.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/InitCheck.h
 StandWorker.h
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/StandWorker.h
 WalkWorker.h
@@ -73,6 +91,12 @@ GallopWorker.h
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/GallopWorker.h
 
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/common_defination.h
+eigen3/Eigen/Dense
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/eigen3/Eigen/Dense
+geometry_msgs/Pose.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/geometry_msgs/Pose.h
+std_msgs/Float64MultiArray.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/std_msgs/Float64MultiArray.h
 
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/common_parameter.h
 reference/common_include.h
