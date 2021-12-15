@@ -1,0 +1,4 @@
+controller_joint_names: ['body_to_LF_shoulder', 'LF_shoulder_to_LF_hip', 'LF_hip_to_LF_knee',
+                         'body_to_RF_shoulder', 'RF_shoulder_to_RF_hip', 'RF_hip_to_RF_knee',
+                         'body_to_LH_shoulder', 'LH_shoulder_to_LH_hip', 'LH_hip_to_LH_knee',
+                         'body_to_RH_shoulder', 'RH_shoulder_to_RH_hip', 'RH_hip_to_RH_knee', ]

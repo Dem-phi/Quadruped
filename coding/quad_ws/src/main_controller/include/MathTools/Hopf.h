@@ -114,15 +114,15 @@ std_msgs::Float64MultiArray Hopf::CalculateAngle(std_msgs::Float64MultiArray msg
         this->x[i] += delta_x * this->delta_t;
         this->y[i] += delta_y * this->delta_t;
     }
-    // rad
+    //rad
     this->angle_msg.data[1] = this->x[0]*this->Rad2Deg;
-    this->angle_msg.data[2] = this->y[0]*this->amplitude[1]/this->amplitude[0]*this->Rad2Deg;
+    this->angle_msg.data[2] = -this->y[0]*this->amplitude[1]/this->amplitude[0]*this->Rad2Deg;
     this->angle_msg.data[4] = this->x[1]*this->Rad2Deg;
-    this->angle_msg.data[5] = this->y[1]*this->amplitude[1]/this->amplitude[0]*this->Rad2Deg;
+    this->angle_msg.data[5] = -this->y[1]*this->amplitude[1]/this->amplitude[0]*this->Rad2Deg;
     this->angle_msg.data[7] = this->x[2]*this->Rad2Deg;
-    this->angle_msg.data[8] = this->y[2]*this->amplitude[1]/this->amplitude[0]*this->Rad2Deg;
+    this->angle_msg.data[8] = -this->y[2]*this->amplitude[1]/this->amplitude[0]*this->Rad2Deg;
     this->angle_msg.data[10] = this->x[3]*this->Rad2Deg;
-    this->angle_msg.data[11] = this->y[3]*this->amplitude[1]/this->amplitude[0]*this->Rad2Deg;
+    this->angle_msg.data[11] = -this->y[3]*this->amplitude[1]/this->amplitude[0]*this->Rad2Deg;
 
     for(int i=0; i<4; i++){
         if(this->y[i] > 0){

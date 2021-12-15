@@ -57,17 +57,22 @@ WalkWorker::~WalkWorker() {
 
 void WalkWorker::run() {
     ROS_INFO("Walking");
-    //cout << amplitude.x() << "   " << amplitude.y() << endl;
     /*! LF should->hip->knee (0, 1, 2)*/
     this->angle_gazebo_data_ = model_Hopf->CalculateAngle(this->angle_gazebo_data_);
-//    msg_angle.data = walk_table->Get_Angle_From_Table().data;
-
-    /*! pub to low computer */
-    this->angle_real_data_.data[0] = 0;
+    /*! pub to low computer, already send the degree*/
+/*    this->angle_real_data_.data[0] = 0;
     this->angle_real_data_.data[1] = this->angle_gazebo_data_.data[1];
-    this->angle_real_data_.data[2] = this->angle_gazebo_data_.data[2];
-    this->angle_real_pub_.publish(this->angle_real_data_);
+    this->angle_real_data_.data[2] = this->angle_gazebo_data_.data[2];*/
+    /*! add some bias, remap to the gazebo, */
+    for (int i = 0; i < 4; i++) {
+        this->angle_gazebo_data_.data[3*i] = 0.0;
+        this->angle_gazebo_data_.data[3*i+1] += quad::GAZEBO_BIAS.y();
+        this->angle_gazebo_data_.data[3*i+2] += quad::GAZEBO_BIAS.z();
 
+    }
+/*    std::cout << this->angle_gazebo_data_ << std::endl;*/
+
+    this->angle_real_pub_.publish(this->angle_real_data_);
     /*! pub to gazebo */
     this->angle_gazebo_pub_.publish(this->angle_gazebo_data_);
 }

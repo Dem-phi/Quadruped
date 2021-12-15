@@ -1,0 +1,8 @@
+prefix=/home/demphi/ros/quad_ws/install
+
+Name: cheetah_model
+Description: Description of cheetah_model
+Version: 1.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

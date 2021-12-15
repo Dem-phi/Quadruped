@@ -52,7 +52,7 @@ FSM::~FSM() {
 }
 
 void FSM::loop(const ros::TimerEvent &) {
-    //running the schedule table
+    /*! running the schedule table */
     if(this->Workers[this->flow]->is_finished()){
         this->flow++;
         if(this->flow == this->Workers.size()){

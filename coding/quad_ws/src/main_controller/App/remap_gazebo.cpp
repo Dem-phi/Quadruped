@@ -29,6 +29,7 @@ void angle_Callback(const std_msgs::Float64MultiArrayConstPtr &msg){
     real_angle[9].data = msg->data[9]/Rad2Deg;
     real_angle[10].data = msg->data[10]/Rad2Deg;
     real_angle[11].data = msg->data[11]/Rad2Deg;
+
     for(int i = 0;i < 12; i++){
         remap[i].publish(real_angle[i]);
     }
@@ -39,17 +40,17 @@ int main (int argc, char** argv){
     ros::init(argc, argv, "remap");
     ros::NodeHandle nh;
     angle_sub = nh.subscribe("/quad/set_angle_gazebo", 1, angle_Callback);
-    remap[0] = nh.advertise<std_msgs::Float64>("/dog_v4/LF_top_position_controller/command", 1);
-    remap[1] = nh.advertise<std_msgs::Float64>("/dog_v4/LF_mid_position_controller/command", 1);
-    remap[2] = nh.advertise<std_msgs::Float64>("/dog_v4/LF_down_position_controller/command", 1);
-    remap[3] = nh.advertise<std_msgs::Float64>("/dog_v4/RF_top_position_controller/command", 1);
-    remap[4] = nh.advertise<std_msgs::Float64>("/dog_v4/RF_mid_position_controller/command", 1);
-    remap[5] = nh.advertise<std_msgs::Float64>("/dog_v4/RF_down_position_controller/command", 1);
-    remap[6] = nh.advertise<std_msgs::Float64>("/dog_v4/RB_top_position_controller/command", 1);
-    remap[7] = nh.advertise<std_msgs::Float64>("/dog_v4/RB_mid_position_controller/command", 1);
-    remap[8] = nh.advertise<std_msgs::Float64>("/dog_v4/RB_down_position_controller/command", 1);
-    remap[9] = nh.advertise<std_msgs::Float64>("/dog_v4/LB_top_position_controller/command", 1);
-    remap[10] = nh.advertise<std_msgs::Float64>("/dog_v4/LB_mid_position_controller/command", 1);
-    remap[11] = nh.advertise<std_msgs::Float64>("/dog_v4/LB_down_position_controller/command", 1);
+    remap[0] = nh.advertise<std_msgs::Float64>("/cheetah/LF_shoulder_position_controller/command", 1);
+    remap[1] = nh.advertise<std_msgs::Float64>("/cheetah/LF_hip_position_controller/command", 1);
+    remap[2] = nh.advertise<std_msgs::Float64>("/cheetah/LF_knee_position_controller/command", 1);
+    remap[3] = nh.advertise<std_msgs::Float64>("/cheetah/RF_shoulder_position_controller/command", 1);
+    remap[4] = nh.advertise<std_msgs::Float64>("/cheetah/RF_hip_position_controller/command", 1);
+    remap[5] = nh.advertise<std_msgs::Float64>("/cheetah/RF_knee_position_controller/command", 1);
+    remap[6] = nh.advertise<std_msgs::Float64>("/cheetah/RH_shoulder_position_controller/command", 1);
+    remap[7] = nh.advertise<std_msgs::Float64>("/cheetah/RH_hip_position_controller/command", 1);
+    remap[8] = nh.advertise<std_msgs::Float64>("/cheetah/RH_knee_position_controller/command", 1);
+    remap[9] = nh.advertise<std_msgs::Float64>("/cheetah/LH_shoulder_position_controller/command", 1);
+    remap[10] = nh.advertise<std_msgs::Float64>("/cheetah/LH_hip_position_controller/command", 1);
+    remap[11] = nh.advertise<std_msgs::Float64>("/cheetah/LH_knee_position_controller/command", 1);
     ros::spin();
 }

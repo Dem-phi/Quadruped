@@ -309,6 +309,12 @@ _gtest_SOURCES:FILEPATH=/usr/src/gtest/src/gtest.cc
 //The directory containing a CMake configuration file for catkin.
 catkin_DIR:PATH=/opt/ros/melodic/share/catkin/cmake
 
+//Value Computed by CMake
+cheetah_model_BINARY_DIR:STATIC=/home/demphi/ros/quad_ws/build/cheetah_model
+
+//Value Computed by CMake
+cheetah_model_SOURCE_DIR:STATIC=/home/demphi/ros/quad_ws/src/cheetah_model
+
 //The directory containing a CMake configuration file for cpp_common.
 cpp_common_DIR:PATH=/opt/ros/melodic/share/cpp_common/cmake
 
@@ -403,6 +409,12 @@ message_generation_DIR:PATH=/opt/ros/melodic/share/message_generation/cmake
 //The directory containing a CMake configuration file for message_runtime.
 message_runtime_DIR:PATH=/opt/ros/melodic/share/message_runtime/cmake
 
+//Value Computed by CMake
+pigot_stl_model_BINARY_DIR:STATIC=/home/demphi/ros/quad_ws/build/cheetah_model
+
+//Value Computed by CMake
+pigot_stl_model_SOURCE_DIR:STATIC=/home/demphi/ros/quad_ws/src/cheetah_model
+
 //The directory containing a CMake configuration file for rosconsole.
 rosconsole_DIR:PATH=/opt/ros/melodic/share/rosconsole/cmake
 
@@ -438,6 +450,12 @@ state_estimate_SOURCE_DIR:STATIC=/home/demphi/ros/quad_ws/src/state_estimate
 
 //The directory containing a CMake configuration file for std_msgs.
 std_msgs_DIR:PATH=/opt/ros/melodic/share/std_msgs/cmake
+
+//Value Computed by CMake
+wtr_dog_BINARY_DIR:STATIC=/home/demphi/ros/quad_ws/build/wtr_dog
+
+//Value Computed by CMake
+wtr_dog_SOURCE_DIR:STATIC=/home/demphi/ros/quad_ws/src/wtr_dog
 
 //Value Computed by CMake
 wtr_serial_BINARY_DIR:STATIC=/home/demphi/ros/quad_ws/build/wtr-serial

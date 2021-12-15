@@ -132,8 +132,8 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("/home/demphi/ros/quad_ws/build/gtest/cmake_install.cmake")
   include("/home/demphi/ros/quad_ws/build/main_controller/cmake_install.cmake")
+  include("/home/demphi/ros/quad_ws/build/cheetah_model/cmake_install.cmake")
   include("/home/demphi/ros/quad_ws/build/state_estimate/cmake_install.cmake")
-  include("/home/demphi/ros/quad_ws/build/dog_v4/cmake_install.cmake")
   include("/home/demphi/ros/quad_ws/build/wtr-serial/cmake_install.cmake")
 
 endif()

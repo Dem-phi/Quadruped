@@ -1,0 +1,57 @@
+cheetah:
+  #list of controllers
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 50
+
+  LF_shoulder_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: body_to_LF_shoulder
+    pid: {p: 400, i: 0.01, d: 0.01}
+  LF_hip_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: LF_shoulder_to_LF_hip
+    pid: {p: 500, i: 0.01, d: 0.002}
+  LF_knee_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: LF_hip_to_LF_knee
+    pid: {p: 800, i: 0.01, d: 0.002}
+
+  RF_shoulder_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: body_to_RF_shoulder
+    pid: {p: 400, i: 0.01, d: 0.01}
+  RF_hip_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: RF_shoulder_to_RF_hip
+    pid: {p: 500, i: 0.01, d: 0.002}
+  RF_knee_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: RF_hip_to_RF_knee
+    pid: {p: 800, i: 0.01, d: 0.002}
+
+  LH_shoulder_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: body_to_LH_shoulder
+    pid: {p: 400, i: 0.01, d: 0.01}
+  LH_hip_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: LH_shoulder_to_LH_hip
+    pid: {p: 500, i: 0.01, d: 0.002}
+  LH_knee_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: LH_hip_to_LH_knee
+    pid: {p: 800, i: 0.01, d: 0.002}
+
+  RH_shoulder_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: body_to_RH_shoulder
+    pid: {p: 400, i: 0.01, d: 0.01}
+  RH_hip_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: RH_shoulder_to_RH_hip
+    pid: {p: 500, i: 0.01, d: 0.002}
+  RH_knee_position_controller:
+    type: effort_controllers/JointPositionController
+    joint: RH_hip_to_RH_knee
+    pid: {p: 800, i: 0.01, d: 0.002}

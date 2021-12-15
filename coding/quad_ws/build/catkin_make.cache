@@ -1,2 +1,2 @@
-dog_v4:main_controller:state_estimate:wtr-serial
+cheetah_model:main_controller:state_estimate:wtr-serial
 -DCATKIN_DEVEL_PREFIX=/home/demphi/ros/quad_ws/devel -DCMAKE_INSTALL_PREFIX=/home/demphi/ros/quad_ws/install -G Unix Makefiles

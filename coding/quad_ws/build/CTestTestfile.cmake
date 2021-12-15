@@ -6,6 +6,6 @@
 # testing this directory and lists subdirectories to be tested as well.
 subdirs("gtest")
 subdirs("main_controller")
+subdirs("cheetah_model")
 subdirs("state_estimate")
-subdirs("dog_v4")
 subdirs("wtr-serial")

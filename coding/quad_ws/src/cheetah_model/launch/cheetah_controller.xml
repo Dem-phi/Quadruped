@@ -1,0 +1,21 @@
+<launch>
+    <!--Load the joint controllers to param server-->
+    <rosparam file="$(find cheetah_model)/config/controllers.yaml" command="load"/>
+
+    <!--Load controllers-->
+    <node name="spawner" pkg="controller_manager" type="spawner" respawn="false"
+          output="screen" ns="/cheetah"
+          args="joint_state_controller
+          LF_shoulder_position_controller
+          LF_hip_position_controller
+          LF_knee_position_controller
+          RF_shoulder_position_controller
+          RF_hip_position_controller
+          RF_knee_position_controller
+          LH_shoulder_position_controller
+          LH_hip_position_controller
+          LH_knee_position_controller
+          RH_shoulder_position_controller
+          RH_hip_position_controller
+          RH_knee_position_controller"/>
+</launch>

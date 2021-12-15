@@ -1,0 +1,22 @@
+<launch>
+  <include file="$(find cheetah_model)/launch/cheetah_model_description.xml"/>
+  <include file="$(find cheetah_model)/launch/cheetah_controller.xml"/>
+  <include file="$(find main_controller)/launch/main.launch"/>
+
+  <!--Launch a gazebo world-->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+<!--    <arg name="world_name" value="$(find cheetah_model)/worlds/cloister.world"/>-->
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+    <arg name="headless" value="false"/>
+    <arg name="debug" value="false"/>
+  </include>
+
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"
+        respawn="false" output="screen"
+        args="-urdf -param robot_description -x 0 -y 0 -z 1.5 -R 0 -P 0 -Y 3.14 -model cheetah_model"/>
+
+
+
+</launch>

@@ -1,0 +1,8 @@
+prefix=/home/demphi/ros/quad_ws/devel
+
+Name: pigot_stl_model
+Description: Description of pigot_stl_model
+Version: 1.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

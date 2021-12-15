@@ -1,0 +1,96 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.w3.org/2007/XMLSchema-versioning" >
+    <!-- gazebo ros control-->
+    <gazebo>
+        <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+            <robotNamespace>/cheetah</robotNamespace>
+            <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+        </plugin>
+    </gazebo>
+
+    <!-- links -->
+    <gazebo reference="body_link">
+        <material>Gazebo/White</material>
+    </gazebo>
+
+    <!-- LF -->
+    <gazebo reference="LF_shoulder_link">
+        <material>Gazebo/Red</material>
+        <mu1>10</mu1>
+        <mu2>10</mu2>
+        <minDepth>0.0001</minDepth>
+    </gazebo>
+    <gazebo reference="LF_hip_link">
+        <material>Gazebo/Blue</material>
+        <mu1>10</mu1>
+        <mu2>10</mu2>
+        <minDepth>0.0001</minDepth>
+    </gazebo>
+    <gazebo reference="LF_knee_link">
+        <material>Gazebo/White</material>
+        <mu1>50</mu1>
+        <mu2>50</mu2>
+        <minDepth>0.0001</minDepth>
+    </gazebo>
+
+    <!-- RF -->
+    <gazebo reference="RF_shoulder_link">
+        <material>Gazebo/Red</material>
+        <mu1>10</mu1>
+        <mu2>10</mu2>
+        <minDepth>0.0001</minDepth>
+
+    </gazebo>
+    <gazebo reference="RF_hip_link">
+        <material>Gazebo/Blue</material>
+        <mu1>10</mu1>
+        <mu2>10</mu2>
+        <minDepth>0.0001</minDepth>
+    </gazebo>
+    <gazebo reference="RF_knee_link">
+        <material>Gazebo/White</material>
+        <mu1>50</mu1>
+        <mu2>50</mu2>
+        <minDepth>0.0001</minDepth>
+    </gazebo>
+
+    <!-- LH -->
+    <gazebo reference="LH_shoulder_link">
+        <material>Gazebo/Red</material>
+        <mu1>10</mu1>
+        <mu2>10</mu2>
+        <minDepth>0.0001</minDepth>
+    </gazebo>
+    <gazebo reference="LH_hip_link">
+        <material>Gazebo/Blue</material>
+        <mu1>10</mu1>
+        <mu2>10</mu2>
+        <minDepth>0.0001</minDepth>
+    </gazebo>
+    <gazebo reference="LH_knee_link">
+        <material>Gazebo/Black</material>
+        <mu1>50</mu1>
+        <mu2>50</mu2>
+        <minDepth>0.0001</minDepth>
+    </gazebo>
+
+    <!-- RH -->
+    <gazebo reference="RH_shoulder_link">
+        <material>Gazebo/Red</material>
+        <mu1>10</mu1>
+        <mu2>10</mu2>
+        <minDepth>0.0001</minDepth>
+    </gazebo>
+    <gazebo reference="RH_hip_link">
+        <material>Gazebo/Blue</material>
+        <mu1>10</mu1>
+        <mu2>10</mu2>
+        <minDepth>0.0001</minDepth>
+    </gazebo>
+    <gazebo reference="RH_knee_link">
+        <material>Gazebo/Black</material>
+        <mu1>50</mu1>
+        <mu2>50</mu2>
+        <minDepth>0.0001</minDepth>
+    </gazebo>
+</robot>

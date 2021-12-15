@@ -12,13 +12,13 @@ int main(int argc, char** argv){
 
     Finite_State_Machine.build_ScheduleTable(
             quad::STAND,
+            quad::WALK,
 //            quad::TROT, 1.0
 //            quad::PACE, 1.2,
 //            quad::GALLOP, 1.6,
             quad::END
             );
     Finite_State_Machine.set_timer();
-
 
     ros::AsyncSpinner spinner(0);
     spinner.start();
