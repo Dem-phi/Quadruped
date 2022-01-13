@@ -35,7 +35,7 @@ public:
     Eigen::Vector4f RY = {0.0, 0.0, 0.0, 0.0};
 
     //1000HZ
-    float delta_t = 0.001;
+    float delta_t = 0.002;
 
     //output
     Eigen::Vector4f x = {0.1310, 0, 0, 0};

@@ -25,7 +25,7 @@ public:
 
     CAR* model_CAR = new CAR(0.3, 0.8, 0.02, quad::WALK_BETA);
     GaitTable* walk_table = new GaitTable();
-    Hopf* model_Hopf = new Hopf({7.4, 5.3}, quad::WALK_BETA, quad::WALK_PHI);
+    Hopf* model_Hopf = new Hopf(model_CAR->Calculate_amplitude(), quad::WALK_BETA, quad::WALK_PHI);
     Eigen::Vector2f amplitude;
 
     virtual void run();
@@ -57,6 +57,7 @@ WalkWorker::~WalkWorker() {
 
 void WalkWorker::run() {
     ROS_INFO("Walking");
+    std::cout << this->amplitude << std::endl;
     /*! LF should->hip->knee (0, 1, 2)*/
     this->angle_gazebo_data_ = model_Hopf->CalculateAngle(this->angle_gazebo_data_);
     /*! pub to low computer, already send the degree*/

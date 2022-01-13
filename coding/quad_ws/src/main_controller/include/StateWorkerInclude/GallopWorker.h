@@ -6,13 +6,18 @@
 #define _GALLOPWORKER_
 
 class GallopWorker:public StateWorker{
+private:
+    ros::Publisher angle_gazebo_pub_, angle_real_pub_;
+
 public:
-    ros::NodeHandle nh;
-    ros::Publisher pub_angle;
-    std_msgs::Float64MultiArray msg_angle;
+    ros::NodeHandle nh_;
+
+    std_msgs::Float64MultiArray angle_gazebo_data_;
+
+    std_msgs::Float64MultiArray angle_real_data_;
 
     CAR* model_CAR = new CAR(1.6, 0.4, 0.04, quad::GALLOP_BETA);
-    Hopf* model_Hopf = new Hopf({13.4, 10.0}, quad::GALLOP_BETA, quad::GALLOP_PHI);
+    Hopf* model_Hopf = new Hopf(model_CAR->Calculate_amplitude(), quad::GALLOP_BETA, quad::GALLOP_PHI);
     Eigen::Vector2f amplitude;
 
     virtual void run();
@@ -24,12 +29,17 @@ public:
 };
 
 GallopWorker::GallopWorker(ros::NodeHandle &nh) {
-    this->nh = nh;
-    this->pub_angle = this->nh.advertise<std_msgs::Float64MultiArray>(
+    this->nh_ = nh;
+    this->angle_gazebo_pub_ = this->nh_.advertise<std_msgs::Float64MultiArray>(
+            "/quad/set_angle_gazebo", 1);
+    this->angle_real_pub_ = this->nh_.advertise<std_msgs::Float64MultiArray>(
             "/quad/set_angle", 1);
     this->amplitude = model_CAR->Calculate_amplitude();
-    //init
-    this->msg_angle.data.resize(12);
+
+    /*! Init some param*/
+    this->angle_gazebo_data_.data.resize(12);
+    this->angle_real_data_.data.resize(3);
+
 }
 
 GallopWorker::~GallopWorker() {
@@ -40,9 +50,20 @@ GallopWorker::~GallopWorker() {
 
 void GallopWorker::run() {
     ROS_INFO("Galloping");
-    //cout << amplitude.x() << "   " << amplitude.y() << endl;
-    this->msg_angle = model_Hopf->CalculateAngle(this->msg_angle);
-    pub_angle.publish(msg_angle);
+    std::cout << this->amplitude << std::endl;
+    /*! LF should->hip->knee (0, 1, 2)*/
+    this->angle_gazebo_data_ = model_Hopf->CalculateAngle(this->angle_gazebo_data_);
+
+    /*! add some bias, remap to the gazebo, */
+    for (int i = 0; i < 4; i++) {
+        this->angle_gazebo_data_.data[3*i] = 0.0;
+        this->angle_gazebo_data_.data[3*i+1] += quad::GAZEBO_BIAS.y();
+        this->angle_gazebo_data_.data[3*i+2] += quad::GAZEBO_BIAS.z();
+
+    }
+    this->angle_real_pub_.publish(this->angle_real_data_);
+    /*! pub to gazebo */
+    this->angle_gazebo_pub_.publish(this->angle_gazebo_data_);
 }
 
 bool GallopWorker::is_finished() {
