@@ -66,7 +66,7 @@ void FSM::loop(const ros::TimerEvent &) {
 }
 
 void FSM::set_timer() {
-    this->FSM_Timer_ = this->nh_.createTimer(ros::Duration(0.02), &FSM::loop, this);
+    this->FSM_Timer_ = this->nh_.createTimer(ros::Duration(0.01), &FSM::loop, this);
 }
 
 void FSM::build_ScheduleTable(int Schedule, ...) {

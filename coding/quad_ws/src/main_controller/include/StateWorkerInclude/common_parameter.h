@@ -35,7 +35,9 @@ namespace quad{
     /*! bias of gazebo, use degree*/
     const Eigen::Vector3f GAZEBO_BIAS = {0.0, 30.0, -60.0};
 
-
+    /*! Leg length */
+    const double HIP_LENGTH = 0.4;
+    const double KNEE_LENGTH = 0.4;
 
 
 }

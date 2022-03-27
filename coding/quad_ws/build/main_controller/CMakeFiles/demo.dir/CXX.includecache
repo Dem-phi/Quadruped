@@ -6,6 +6,20 @@
 
 #IncludeRegexTransform: 
 
+/home/demphi/ros/quad_ws/src/main_controller/include/Controllers/FootSwingTrajectory.h
+MathTools/Interpolation.h
+/home/demphi/ros/quad_ws/src/main_controller/include/Controllers/MathTools/Interpolation.h
+
+/home/demphi/ros/quad_ws/src/main_controller/include/Controllers/GaitScheduler.h
+
+/home/demphi/ros/quad_ws/src/main_controller/include/Controllers/LegController.h
+FootSwingTrajectory.h
+/home/demphi/ros/quad_ws/src/main_controller/include/Controllers/FootSwingTrajectory.h
+MathTools/KinematicModel.h
+/home/demphi/ros/quad_ws/src/main_controller/include/Controllers/MathTools/KinematicModel.h
+common_parameter.h
+/home/demphi/ros/quad_ws/src/main_controller/include/Controllers/common_parameter.h
+
 /home/demphi/ros/quad_ws/src/main_controller/include/FiniteStateMachine.h
 stdarg.h
 /home/demphi/ros/quad_ws/src/main_controller/include/stdarg.h
@@ -29,6 +43,16 @@ reference/common_include.h
 /home/demphi/ros/quad_ws/src/main_controller/include/MathTools/reference/common_include.h
 math.h
 /home/demphi/ros/quad_ws/src/main_controller/include/MathTools/math.h
+
+/home/demphi/ros/quad_ws/src/main_controller/include/MathTools/Interpolation.h
+assert.h
+-
+type_traits
+-
+
+/home/demphi/ros/quad_ws/src/main_controller/include/MathTools/KinematicModel.h
+common_include.h
+/home/demphi/ros/quad_ws/src/main_controller/include/MathTools/common_include.h
 
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/GallopWorker.h
 
@@ -65,6 +89,14 @@ GaitTable.h
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/GaitTable.h
 GaitTransition.h
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/GaitTransition.h
+KinematicModel.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/KinematicModel.h
+Controllers/GaitScheduler.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/Controllers/GaitScheduler.h
+Controllers/FootSwingTrajectory.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/Controllers/FootSwingTrajectory.h
+Controllers/LegController.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/Controllers/LegController.h
 
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/TrotWorker.h
 
@@ -89,6 +121,12 @@ PaceWorker.h
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/PaceWorker.h
 GallopWorker.h
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/GallopWorker.h
+Controllers/GaitScheduler.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/Controllers/GaitScheduler.h
+Controllers/FootSwingTrajectory.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/Controllers/FootSwingTrajectory.h
+Controllers/LegController.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/Controllers/LegController.h
 
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/common_defination.h
 eigen3/Eigen/Dense

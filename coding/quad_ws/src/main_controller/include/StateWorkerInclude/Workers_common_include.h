@@ -14,4 +14,8 @@
 #include "PaceWorker.h"
 #include "GallopWorker.h"
 
+#include "Controllers/GaitScheduler.h"
+#include "Controllers/FootSwingTrajectory.h"
+#include "Controllers/LegController.h"
+
 #endif

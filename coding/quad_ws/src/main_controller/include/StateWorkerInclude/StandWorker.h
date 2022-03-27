@@ -5,9 +5,12 @@
 #ifndef _STANDWORKER_
 #define _STANDWORKER_
 
+
 #include "StateWorker.h"
 #include "geometry_msgs/Vector3.h"
 #include "std_msgs/Float64MultiArray.h"
+
+#define FIRST_GAIT 1
 
 /**
  * @brief send angle msg and stand
@@ -18,9 +21,11 @@ private:
     /*! max = pi/6*/
     int flag_ = 0;
     double command_hip_ = 0;
+    double command_hip_2_ = 0;
     double command_knee_ = 0;
     double init_time_, cur_time_, end_time_;
     double init_hip_ = 90.0, init_knee_ = -175.0;
+
 public:
     ros::NodeHandle nh_;
     ros::Publisher angle_real_pub_, angle_gazebo_pub_;
@@ -60,19 +65,11 @@ StandWorker::~StandWorker() {
 void StandWorker::run() {
     ROS_INFO("Standing");
     this->cur_time_ = ros::Time::now().toSec();
-/*    if(this->command_hip_>1 && this->flag_ == 0){this->flag_ = 1;}
-
-    this->angle_real_data_.data[0] = 0.0;
-    this->angle_real_data_.data[1] = this->command_hip_*M_PI/6*quad::Rad2Deg;
-    this->angle_real_data_.data[2] = 0.0;
-    if(this->flag_ ==  0){
-        this->command_hip_ = this->command_hip_ + 0.01;
-    }*/
-
     /*! delay for completing init*/
     if (this->cur_time_-this->init_time_>=5.0 && this->flag_ == 0){
         this->flag_ = 1;
     }
+#if FIRST_GAIT==0
     /*! Stand in gazebo */
     if(this->flag_ == 1){
         for (int i = 0; i < 4; i++) {
@@ -97,7 +94,40 @@ void StandWorker::run() {
             this->angle_gazebo_data.data[3*i+2] = this->init_knee_;
         }
     }
+#else
+    /*! Stand for trot*/
+    if(this->flag_ == 1){
+        for (int i = 0; i < 4; i++) {
+            this->angle_gazebo_data.data[3*i] = 0.0;
+            if(i==0 || i==2) {
+                this->angle_gazebo_data.data[3*i+1] = this->init_hip_-this->command_hip_;
+            }else {
+                this->angle_gazebo_data.data[3*i+1] = this->init_hip_-this->command_hip_2_;
+            }
+            this->angle_gazebo_data.data[3*i+2] = this->init_knee_+2*this->command_knee_;
+        }
+        if(this->command_hip_ < 71.2){
+            this->command_hip_ = this->command_hip_+0.3;
+        }
+        if(this->command_hip_2_ < 51.4){
+            this->command_hip_2_ = this->command_hip_2_+0.3;
+        }
+        if(this->command_knee_ < 59.2){
+            this->command_knee_ = this->command_knee_ + 0.3;
+        }
+        if(this->command_hip_ >=60.0 && this->command_knee_>=59.2){
+            this->flag_ = 2;
+            this->end_time_ = ros::Time::now().toSec();
+        }
+    }else if(this->flag_ == 0){
+        for (int i = 0; i < 4; i++) {
+            this->angle_gazebo_data.data[3*i] = 0.0;
+            this->angle_gazebo_data.data[3*i+1] = this->init_hip_;
+            this->angle_gazebo_data.data[3*i+2] = this->init_knee_;
+        }
+    }
 
+#endif
     this->angle_gazebo_pub_.publish(this->angle_gazebo_data);
     this->angle_real_pub_.publish(this->angle_real_data_);
     /*! for safety */
@@ -105,7 +135,7 @@ void StandWorker::run() {
 }
 
 bool StandWorker::is_finished() {
-    if((this->cur_time_-this->end_time_ >= 3.0) && this->flag_ == 2){
+    if((this->cur_time_-this->end_time_ >= 1.0) && this->flag_ == 2){
         ROS_INFO("Finish Stand State");
         return true;
     }else{
