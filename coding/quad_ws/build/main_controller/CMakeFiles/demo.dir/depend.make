@@ -4,6 +4,7 @@
 main_controller/CMakeFiles/demo.dir/src/demo.cpp.o: /home/demphi/ros/quad_ws/src/main_controller/include/Controllers/FootSwingTrajectory.h
 main_controller/CMakeFiles/demo.dir/src/demo.cpp.o: /home/demphi/ros/quad_ws/src/main_controller/include/Controllers/GaitScheduler.h
 main_controller/CMakeFiles/demo.dir/src/demo.cpp.o: /home/demphi/ros/quad_ws/src/main_controller/include/Controllers/LegController.h
+main_controller/CMakeFiles/demo.dir/src/demo.cpp.o: /home/demphi/ros/quad_ws/src/main_controller/include/Controllers/PlanningContactPosition.h
 main_controller/CMakeFiles/demo.dir/src/demo.cpp.o: /home/demphi/ros/quad_ws/src/main_controller/include/FiniteStateMachine.h
 main_controller/CMakeFiles/demo.dir/src/demo.cpp.o: /home/demphi/ros/quad_ws/src/main_controller/include/MathTools/CAR.h
 main_controller/CMakeFiles/demo.dir/src/demo.cpp.o: /home/demphi/ros/quad_ws/src/main_controller/include/MathTools/GaitTable.h
@@ -11,6 +12,7 @@ main_controller/CMakeFiles/demo.dir/src/demo.cpp.o: /home/demphi/ros/quad_ws/src
 main_controller/CMakeFiles/demo.dir/src/demo.cpp.o: /home/demphi/ros/quad_ws/src/main_controller/include/MathTools/Hopf.h
 main_controller/CMakeFiles/demo.dir/src/demo.cpp.o: /home/demphi/ros/quad_ws/src/main_controller/include/MathTools/Interpolation.h
 main_controller/CMakeFiles/demo.dir/src/demo.cpp.o: /home/demphi/ros/quad_ws/src/main_controller/include/MathTools/KinematicModel.h
+main_controller/CMakeFiles/demo.dir/src/demo.cpp.o: /home/demphi/ros/quad_ws/src/main_controller/include/StateEstimate/StateEstimate.h
 main_controller/CMakeFiles/demo.dir/src/demo.cpp.o: /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/GallopWorker.h
 main_controller/CMakeFiles/demo.dir/src/demo.cpp.o: /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/InitCheck.h
 main_controller/CMakeFiles/demo.dir/src/demo.cpp.o: /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/PaceWorker.h

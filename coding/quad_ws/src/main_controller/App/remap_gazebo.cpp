@@ -5,6 +5,8 @@
 #include "ros/ros.h"
 #include "std_msgs/Float64.h"
 #include "std_msgs/Float64MultiArray.h"
+#include "unitree_legged_msgs/MotorCmd.h"
+#include "unitree_legged_msgs/MotorState.h"
 
 // LF -> RF -> RH -> RF
 // shoulder -> thigh -> knee
@@ -40,7 +42,7 @@ int main (int argc, char** argv){
     ros::init(argc, argv, "remap");
     ros::NodeHandle nh;
     angle_sub = nh.subscribe("/quad/set_angle_gazebo", 1, angle_Callback);
-    remap[0] = nh.advertise<std_msgs::Float64>("/cheetah/LF_shoulder_position_controller/command", 1);
+/*    remap[0] = nh.advertise<std_msgs::Float64>("/cheetah/LF_shoulder_position_controller/command", 1);
     remap[1] = nh.advertise<std_msgs::Float64>("/cheetah/LF_hip_position_controller/command", 1);
     remap[2] = nh.advertise<std_msgs::Float64>("/cheetah/LF_knee_position_controller/command", 1);
     remap[3] = nh.advertise<std_msgs::Float64>("/cheetah/RF_shoulder_position_controller/command", 1);
@@ -51,6 +53,31 @@ int main (int argc, char** argv){
     remap[8] = nh.advertise<std_msgs::Float64>("/cheetah/RH_knee_position_controller/command", 1);
     remap[9] = nh.advertise<std_msgs::Float64>("/cheetah/LH_shoulder_position_controller/command", 1);
     remap[10] = nh.advertise<std_msgs::Float64>("/cheetah/LH_hip_position_controller/command", 1);
-    remap[11] = nh.advertise<std_msgs::Float64>("/cheetah/LH_knee_position_controller/command", 1);
+    remap[11] = nh.advertise<std_msgs::Float64>("/cheetah/LH_knee_position_controller/command", 1);*/
+/*    remap[3] = nh.advertise<unitree_legged_msgs::MotorCmd>("/aliengo_gazebo/FR_hip_controller/command", 1);
+    remap[4] = nh.advertise<unitree_legged_msgs::MotorCmd>("/aliengo_gazebo/FR_thigh_controller/command", 1);
+    remap[5] = nh.advertise<unitree_legged_msgs::MotorCmd>("/aliengo_gazebo/FR_calf_controller/command", 1);
+    remap[0] = nh.advertise<unitree_legged_msgs::MotorCmd>("/aliengo_gazebo/FL_hip_controller/command", 1);
+    remap[1] = nh.advertise<unitree_legged_msgs::MotorCmd>("/aliengo_gazebo/FL_thigh_controller/command", 1);
+    remap[2] = nh.advertise<unitree_legged_msgs::MotorCmd>("/aliengo_gazebo/FL_calf_controller/command", 1);
+    remap[6] = nh.advertise<unitree_legged_msgs::MotorCmd>("/aliengo_gazebo/RR_hip_controller/command", 1);
+    remap[7] = nh.advertise<unitree_legged_msgs::MotorCmd>("/aliengo_gazebo/RR_thigh_controller/command", 1);
+    remap[8] = nh.advertise<unitree_legged_msgs::MotorCmd>("/aliengo_gazebo/RR_calf_controller/command", 1);
+    remap[9] = nh.advertise<unitree_legged_msgs::MotorCmd>("/aliengo_gazebo/RL_hip_controller/command", 1);
+    remap[10] = nh.advertise<unitree_legged_msgs::MotorCmd>("/aliengo_gazebo/RL_thigh_controller/command", 1);
+    remap[11] = nh.advertise<unitree_legged_msgs::MotorCmd>("/aliengo_gazebo/RL_calf_controller/command", 1);*/
+    remap[3] = nh.advertise<std_msgs::Float64>("/aliengo_gazebo/FR_hip_controller/command", 1);
+    remap[4] = nh.advertise<std_msgs::Float64>("/aliengo_gazebo/FR_thigh_controller/command", 1);
+    remap[5] = nh.advertise<std_msgs::Float64>("/aliengo_gazebo/FR_calf_controller/command", 1);
+    remap[0] = nh.advertise<std_msgs::Float64>("/aliengo_gazebo/FL_hip_controller/command", 1);
+    remap[1] = nh.advertise<std_msgs::Float64>("/aliengo_gazebo/FL_thigh_controller/command", 1);
+    remap[2] = nh.advertise<std_msgs::Float64>("/aliengo_gazebo/FL_calf_controller/command", 1);
+    remap[6] = nh.advertise<std_msgs::Float64>("/aliengo_gazebo/RR_hip_controller/command", 1);
+    remap[7] = nh.advertise<std_msgs::Float64>("/aliengo_gazebo/RR_thigh_controller/command", 1);
+    remap[8] = nh.advertise<std_msgs::Float64>("/aliengo_gazebo/RR_calf_controller/command", 1);
+    remap[9] = nh.advertise<std_msgs::Float64>("/aliengo_gazebo/RL_hip_controller/command", 1);
+    remap[10] = nh.advertise<std_msgs::Float64>("/aliengo_gazebo/RL_thigh_controller/command", 1);
+    remap[11] = nh.advertise<std_msgs::Float64>("/aliengo_gazebo/RL_calf_controller/command", 1);
+
     ros::spin();
 }

@@ -5,6 +5,7 @@
 #ifndef _GAITSCHEDULER_
 #define _GAITSCHEDULER_
 
+
 struct GaitData{
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     GaitData(){zero();}
@@ -35,6 +36,12 @@ struct GaitData{
         phase_stance_ = Vec4::Zero();     // stance subphase
         phase_swing_ = Vec4::Zero();      // swing subphase
 
+        // Contact descriptors
+        contact_state_schedule_ = Eigen::Vector4i::Zero();
+        contact_state_prev_ = Eigen::Vector4i::Zero();
+        touch_down_schedule_ = Eigen::Vector4i::Zero();
+        lift_off_schedule_ = Eigen::Vector4i::Zero();
+
     }
     // the current gait type
     quad::STATE_TYPE cur_gait_;
@@ -64,6 +71,13 @@ struct GaitData{
     Vec4 phase_scale_;      // phase scale relative to variable
     Vec4 phase_stance_;     // stance subphase
     Vec4 phase_swing_;      // swing subphase
+
+    // Contact descriptors
+    Eigen::Vector4i contact_state_schedule_;
+    Eigen::Vector4i contact_state_prev_;
+    Eigen::Vector4i touch_down_schedule_;
+    Eigen::Vector4i lift_off_schedule_;
+
 };
 
 class GaitScheduler{
@@ -93,6 +107,7 @@ public:
     */
     void step(){
         for (int foot = 0; foot < 4; foot++) {
+            this->gait_data_.contact_state_prev_(foot) = this->gait_data_.contact_state_schedule_(foot);
             if(this->gait_data_.gait_enabled_(foot) == 1){
                 // Get the dphase for iterate
                 this->dphase_ = this->gait_data_.phase_scale_(foot) *
@@ -102,6 +117,7 @@ public:
                         fmod((this->gait_data_.phase_variable_(foot)+dphase_), 1);
                 // In stance phase
                 if(this->gait_data_.phase_variable_(foot) < this->gait_data_.switching_phase_(foot)){
+                    this->gait_data_.contact_state_schedule_(foot) = 1;
                     this->gait_data_.phase_stance_(foot) =
                             this->gait_data_.phase_variable_(foot) / this->gait_data_.switching_phase_(foot);
                     // Foot is in stance, no swing time remaining
@@ -110,9 +126,18 @@ public:
                     this->gait_data_.time_stance_remaining_(foot) =
                             this->gait_data_.period_time_(foot) *
                                 (this->gait_data_.switching_phase_(foot)-this->gait_data_.phase_variable_(foot));
+                    // First contact signifies scheduled touchdown
+                    if(this->gait_data_.contact_state_prev_(foot) == 0){
+                        //set touch down flag to 1
+                        this->gait_data_.touch_down_schedule_(foot) = 1;
+                    }else{
+                        this->gait_data_.touch_down_schedule_(foot) = 0;
+                    }
+
                 }
                 // In swing phase
                 else{
+                    this->gait_data_.contact_state_schedule_(foot) = 0;
                     this->gait_data_.phase_stance_(foot) = 1.0;
                     // cur swing phase in the whole swing phase(=1)
                     this->gait_data_.phase_swing_(foot) =
@@ -123,17 +148,22 @@ public:
                     // Calculate the remaining time in swing
                     this->gait_data_.time_swing_remaining_(foot) =
                             this->gait_data_.period_time_(foot) * (1.0 - this->gait_data_.phase_variable_(foot));
-
+                    // First contact signifies scheduled touchdown
+                    if(this->gait_data_.contact_state_prev_(foot) == 1){
+                        this->gait_data_.lift_off_schedule_(foot) = 1;
+                    }else{
+                        this->gait_data_.lift_off_schedule_(foot) = 0;
+                    }
                 }
             }
             else{
                 //Leg is not enabled
                 this->gait_data_.phase_variable_(foot) = 0.0;
+                this->gait_data_.contact_state_schedule_(foot) = 0;
 
             }
         }
     }
-
 
     /*!
      *  Loading the gait parameters for different gait type
@@ -154,10 +184,10 @@ public:
                 this->gait_data_.gait_name_ = "TROT";
                 this->gait_data_.gait_enabled_ << 1, 1, 1, 1;
                 this->gait_data_.period_time_nominal_ = 0.5;
-                this->gait_data_.initial_phase_ = 0.0;
-                this->gait_data_.switching_phase_nominal_ = 0.5;
                 //解决初始迭代问题
-                this->gait_data_.phase_offset_ << -0.02, 0.48, -0.02, 0.48;
+                this->gait_data_.initial_phase_ = -0.02;
+                this->gait_data_.switching_phase_nominal_ = 0.5;
+                this->gait_data_.phase_offset_ << 0, 0.5, 0, 0.5;
                 this->gait_data_.phase_scale_ << 1.0, 1.0, 1.0, 1.0;
                 break;
         }

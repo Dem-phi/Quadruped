@@ -439,6 +439,9 @@ rospy_DIR:PATH=/opt/ros/melodic/share/rospy/cmake
 //The directory containing a CMake configuration file for rostime.
 rostime_DIR:PATH=/opt/ros/melodic/share/rostime/cmake
 
+//The directory containing a CMake configuration file for sensor_msgs.
+sensor_msgs_DIR:PATH=/opt/ros/melodic/share/sensor_msgs/cmake
+
 //The directory containing a CMake configuration file for serial.
 serial_DIR:PATH=/opt/ros/melodic/share/serial/cmake
 
@@ -450,6 +453,15 @@ state_estimate_SOURCE_DIR:STATIC=/home/demphi/ros/quad_ws/src/state_estimate
 
 //The directory containing a CMake configuration file for std_msgs.
 std_msgs_DIR:PATH=/opt/ros/melodic/share/std_msgs/cmake
+
+//Value Computed by CMake
+unitree_legged_msgs_BINARY_DIR:STATIC=/home/demphi/ros/quad_ws/build/unitree_legged_msgs
+
+//The directory containing a CMake configuration file for unitree_legged_msgs.
+unitree_legged_msgs_DIR:PATH=/home/demphi/ros/quad_ws/devel/share/unitree_legged_msgs/cmake
+
+//Value Computed by CMake
+unitree_legged_msgs_SOURCE_DIR:STATIC=/home/demphi/ros/quad_ws/src/unitree_legged_msgs
 
 //Value Computed by CMake
 wtr_dog_BINARY_DIR:STATIC=/home/demphi/ros/quad_ws/build/wtr_dog
@@ -578,7 +590,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=8
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=9
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP

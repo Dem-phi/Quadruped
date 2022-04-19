@@ -24,6 +24,7 @@ struct LegControllerData{
     Mat22 J;
     /*! angle of three joints*/
     Vec3 q;
+    Vec3 qd;
 };
 
 /*!
@@ -70,31 +71,39 @@ public:
         for (int foot = 0; foot < 4; foot++) {
             this->leg_data_[foot].q(0) = 0.0;
             if(foot == 0 || foot == 2){
-                this->leg_data_[foot].q(1) = 18.12/quad::Rad2Deg;
+                this->leg_data_[foot].q(1) = 30/quad::Rad2Deg;
             }else{
-                this->leg_data_[foot].q(1) = 38.6/quad::Rad2Deg;
+                this->leg_data_[foot].q(1) = 30/quad::Rad2Deg;
             }
-            this->leg_data_[foot].q(2) = -56.7/quad::Rad2Deg;
+            this->leg_data_[foot].q(2) = -60/quad::Rad2Deg;
             this->leg_data_[foot].p = this->model_kinematic->ForwardKinematic(foot, this->leg_data_[foot].q);
             ComputeJacobian(this->leg_data_[foot].q, &this->leg_data_[foot].J, foot);
 
             //update velocity by Jacobian
-            this->leg_data_[foot].v << 0.0, 0.0, 0.0;
+            Vec2 temp_v;
+            temp_v.x() = this->leg_data_[foot].qd.y();
+            temp_v.y() = this->leg_data_[foot].qd.z();
+            Vec2 temp_ = this->leg_data_[foot].J * temp_v;
+            this->leg_data_[foot].v << temp_.x(), 0.0, temp_.y();
         }
     }
-
 
     void UpdateData(){
         for (int foot = 0; foot < 4; foot++) {
             for(int joint = 0; joint < 3; joint++){
                 // Assume the command is fully completed
                 this->leg_data_[foot].q(joint) = this->leg_command_[foot].qDes(joint);
+                this->leg_data_[foot].qd(joint) = this->leg_command_[foot].qdDes(joint);
             }
             this->leg_data_[foot].p = this->model_kinematic->ForwardKinematic(foot, this->leg_data_[foot].q);
             ComputeJacobian(this->leg_data_[foot].q, &this->leg_data_[foot].J, foot);
 
             //update velocity by Jacobian
-            this->leg_data_[foot].v << 0.0, 0.0, 0.0;
+            Vec2 temp_v;
+            temp_v.x() = this->leg_data_[foot].qd.y();
+            temp_v.y() = this->leg_data_[foot].qd.z();
+            Vec2 temp_ = this->leg_data_[foot].J * temp_v;
+            this->leg_data_[foot].v << temp_.x(), 0.0, temp_.y();
         }
     }
 
@@ -111,8 +120,15 @@ public:
             // add a PD controller
 
         }*/
+
         for (int foot = 0; foot < 4; foot++) {
             this->leg_command_[foot].qDes = this->model_kinematic->InverseKinematic(foot, this->leg_command_[foot].pDes);
+            Vec2 temp_v;
+            temp_v.x() = this->leg_command_[foot].vDes.x();
+            temp_v.y() = this->leg_command_[foot].vDes.z();
+            Vec2 temp_ = this->leg_data_[foot].J.inverse()*temp_v;
+            this->leg_command_[foot].qdDes.y() = temp_.x();
+            this->leg_command_[foot].qdDes.z() = temp_.y();
         }
     }
 

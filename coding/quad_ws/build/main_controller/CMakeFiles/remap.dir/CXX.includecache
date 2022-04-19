@@ -6,6 +6,38 @@
 
 #IncludeRegexTransform: 
 
+/home/demphi/ros/quad_ws/devel/include/unitree_legged_msgs/MotorCmd.h
+string
+-
+vector
+-
+map
+-
+ros/types.h
+-
+ros/serialization.h
+-
+ros/builtin_message_traits.h
+-
+ros/message_operations.h
+-
+
+/home/demphi/ros/quad_ws/devel/include/unitree_legged_msgs/MotorState.h
+string
+-
+vector
+-
+map
+-
+ros/types.h
+-
+ros/serialization.h
+-
+ros/builtin_message_traits.h
+-
+ros/message_operations.h
+-
+
 /home/demphi/ros/quad_ws/src/main_controller/App/remap_gazebo.cpp
 ros/ros.h
 /home/demphi/ros/quad_ws/src/main_controller/App/ros/ros.h
@@ -13,6 +45,10 @@ std_msgs/Float64.h
 /home/demphi/ros/quad_ws/src/main_controller/App/std_msgs/Float64.h
 std_msgs/Float64MultiArray.h
 /home/demphi/ros/quad_ws/src/main_controller/App/std_msgs/Float64MultiArray.h
+unitree_legged_msgs/MotorCmd.h
+/home/demphi/ros/quad_ws/src/main_controller/App/unitree_legged_msgs/MotorCmd.h
+unitree_legged_msgs/MotorState.h
+/home/demphi/ros/quad_ws/src/main_controller/App/unitree_legged_msgs/MotorState.h
 
 /opt/ros/melodic/include/ros/advertise_options.h
 ros/forwards.h

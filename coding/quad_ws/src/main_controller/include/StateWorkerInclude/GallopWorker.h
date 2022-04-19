@@ -20,7 +20,7 @@ public:
     Hopf* model_Hopf = new Hopf(model_CAR->Calculate_amplitude(), quad::GALLOP_BETA, quad::GALLOP_PHI);
     Eigen::Vector2f amplitude;
 
-    virtual void run();
+    virtual void run(quad::STATE_INFO cur_state);
     virtual bool is_finished();
 
     GallopWorker(ros::NodeHandle &nh);
@@ -48,7 +48,7 @@ GallopWorker::~GallopWorker() {
 
 }
 
-void GallopWorker::run() {
+void GallopWorker::run(quad::STATE_INFO cur_state) {
     ROS_INFO("Galloping");
     std::cout << this->amplitude << std::endl;
     /*! LF should->hip->knee (0, 1, 2)*/

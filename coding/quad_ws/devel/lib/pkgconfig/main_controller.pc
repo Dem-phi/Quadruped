@@ -5,4 +5,4 @@ Description: Description of main_controller
 Version: 0.0.0
 Cflags: 
 Libs: -L${prefix}/lib 
-Requires: 
+Requires: unitree_legged_msgs

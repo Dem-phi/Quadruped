@@ -13,7 +13,7 @@ private:
     /*! main loop function runs in a specific frequency */
     ros::Timer FSM_Timer_;
 
-    ros::Subscriber motor_sub_;
+    ros::Subscriber motor_sub_, imu_sub_, joy_sub_, EKF_sub_;
 
 public:
     ros::NodeHandle nh_;
@@ -30,13 +30,16 @@ public:
 
     /*! Callback Function */
     void MotorCallback(const std_msgs::Float64MultiArray &msg);
-
+    void IMUCallback(const sensor_msgs::Imu &msg);
+    void EKFCallback(const std_msgs::Float64MultiArray &msg);
 
 };
 
 FSM::FSM(ros::NodeHandle &nh) {
     this->nh_ = nh;
     this->motor_sub_ = this->nh_.subscribe("/quad/motor_info", 1000, &FSM::MotorCallback ,this);
+    this->imu_sub_ = this->nh_.subscribe("/body_imu", 1000, &FSM::IMUCallback, this);
+    this->EKF_sub_ = this->nh_.subscribe("/quad/EKF_result", 1000, &FSM::EKFCallback, this);
 
     /*! Init some param */
     this->state_info_.position_feedback_info.data.resize(12);
@@ -61,7 +64,7 @@ void FSM::loop(const ros::TimerEvent &) {
         }
     }
     else{
-        this->Workers[this->flow]->run();
+        this->Workers[this->flow]->run(this->state_info_);
     }
 }
 
@@ -115,6 +118,41 @@ void FSM::build_ScheduleTable(int Schedule, ...) {
 
 void FSM::MotorCallback(const std_msgs::Float64MultiArray &msg) {
 
+}
+
+void FSM::IMUCallback(const sensor_msgs::Imu &msg) {
+    this->state_info_.cur_state.orientation = msg.orientation;
+    this->state_info_.b_twist.angular = msg.angular_velocity;
+    this->state_info_.b_linear_acceleration = msg.linear_acceleration;
+
+    tf::Quaternion quat;
+    tf::quaternionMsgToTF(this->state_info_.cur_state.orientation, quat);
+    Eigen::Quaterniond temp_quat;
+    temp_quat.x() = this->state_info_.cur_state.orientation.x;
+    temp_quat.y() = this->state_info_.cur_state.orientation.y;
+    temp_quat.z() = this->state_info_.cur_state.orientation.z;
+    temp_quat.w() = this->state_info_.cur_state.orientation.w;
+
+    double roll, pitch, yaw;
+    tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
+    this->state_info_.rpy_angle.x = roll;
+    this->state_info_.rpy_angle.y = pitch;
+    this->state_info_.rpy_angle.z = yaw;
+
+}
+
+void FSM::EKFCallback(const std_msgs::Float64MultiArray &msg){
+    this->state_info_.cur_state.position.x = msg.data[0];
+    this->state_info_.cur_state.position.y = msg.data[1];
+    this->state_info_.cur_state.position.z = msg.data[2];
+
+    this->state_info_.w_twist.linear.x = msg.data[3];
+    this->state_info_.w_twist.linear.y = msg.data[4];
+    this->state_info_.w_twist.linear.z = msg.data[5];
+
+    this->state_info_.b_twist.linear.x = msg.data[6];
+    this->state_info_.b_twist.linear.y = msg.data[7];
+    this->state_info_.b_twist.linear.z = msg.data[8];
 }
 
 

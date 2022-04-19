@@ -20,6 +20,8 @@ MathTools/KinematicModel.h
 common_parameter.h
 /home/demphi/ros/quad_ws/src/main_controller/include/Controllers/common_parameter.h
 
+/home/demphi/ros/quad_ws/src/main_controller/include/Controllers/PlanningContactPosition.h
+
 /home/demphi/ros/quad_ws/src/main_controller/include/FiniteStateMachine.h
 stdarg.h
 /home/demphi/ros/quad_ws/src/main_controller/include/stdarg.h
@@ -53,6 +55,14 @@ type_traits
 /home/demphi/ros/quad_ws/src/main_controller/include/MathTools/KinematicModel.h
 common_include.h
 /home/demphi/ros/quad_ws/src/main_controller/include/MathTools/common_include.h
+
+/home/demphi/ros/quad_ws/src/main_controller/include/StateEstimate/StateEstimate.h
+common_defination.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateEstimate/common_defination.h
+common_include.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateEstimate/common_include.h
+Controllers/LegController.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateEstimate/Controllers/LegController.h
 
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/GallopWorker.h
 
@@ -97,6 +107,10 @@ Controllers/FootSwingTrajectory.h
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/Controllers/FootSwingTrajectory.h
 Controllers/LegController.h
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/Controllers/LegController.h
+Controllers/PlanningContactPosition.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/Controllers/PlanningContactPosition.h
+StateEstimate/StateEstimate.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/StateEstimate/StateEstimate.h
 
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/TrotWorker.h
 
@@ -121,18 +135,28 @@ PaceWorker.h
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/PaceWorker.h
 GallopWorker.h
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/GallopWorker.h
+sensor_msgs/Imu.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/sensor_msgs/Imu.h
 Controllers/GaitScheduler.h
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/Controllers/GaitScheduler.h
 Controllers/FootSwingTrajectory.h
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/Controllers/FootSwingTrajectory.h
 Controllers/LegController.h
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/Controllers/LegController.h
+Controllers/PlanningContactPosition.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/Controllers/PlanningContactPosition.h
+StateEstimate/StateEstimate.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/StateEstimate/StateEstimate.h
 
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/common_defination.h
 eigen3/Eigen/Dense
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/eigen3/Eigen/Dense
 geometry_msgs/Pose.h
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/geometry_msgs/Pose.h
+geometry_msgs/Vector3.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/geometry_msgs/Vector3.h
+geometry_msgs/Twist.h
+/home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/geometry_msgs/Twist.h
 std_msgs/Float64MultiArray.h
 /home/demphi/ros/quad_ws/src/main_controller/include/StateWorkerInclude/std_msgs/Float64MultiArray.h
 

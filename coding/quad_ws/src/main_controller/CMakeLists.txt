@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
         rospy
         geometry_msgs
         std_msgs
+        unitree_legged_msgs
 )
 
 find_package(Eigen3 REQUIRED)
@@ -23,7 +24,10 @@ include_directories(
 
 )
 
-catkin_package()
+catkin_package(
+        CATKIN_DEPENDS
+        unitree_legged_msgs
+)
 
 add_executable(
         demo

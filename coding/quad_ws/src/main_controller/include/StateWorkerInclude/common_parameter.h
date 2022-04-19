@@ -32,6 +32,9 @@ namespace quad{
     const double HIP_ANGLE_OFFSET = 45.0;
     const double KNEE_ANGLE_OFFSET = 0.0;
 
+    const double X_OFFSET = 0.3;
+    const double Y_OFFSET = 0.2;
+
     /*! bias of gazebo, use degree*/
     const Eigen::Vector3f GAZEBO_BIAS = {0.0, 30.0, -60.0};
 

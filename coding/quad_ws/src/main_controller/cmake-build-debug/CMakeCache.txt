@@ -420,6 +420,9 @@ rostime_DIR:PATH=/opt/ros/melodic/share/rostime/cmake
 //The directory containing a CMake configuration file for std_msgs.
 std_msgs_DIR:PATH=/opt/ros/melodic/share/std_msgs/cmake
 
+//The directory containing a CMake configuration file for unitree_legged_msgs.
+unitree_legged_msgs_DIR:PATH=unitree_legged_msgs_DIR-NOTFOUND
+
 //The directory containing a CMake configuration file for xmlrpcpp.
 xmlrpcpp_DIR:PATH=/opt/ros/melodic/share/xmlrpcpp/cmake
 

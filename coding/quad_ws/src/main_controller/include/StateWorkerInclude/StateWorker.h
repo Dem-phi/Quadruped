@@ -14,12 +14,13 @@
 #include "Controllers/GaitScheduler.h"
 #include "Controllers/FootSwingTrajectory.h"
 #include "Controllers/LegController.h"
-
+#include "Controllers/PlanningContactPosition.h"
+#include "StateEstimate/StateEstimate.h"
 
 class StateWorker{
 public:
     ros::NodeHandle nh;
-    virtual void run() = 0;
+    virtual void run(quad::STATE_INFO cur_state) = 0;
     virtual bool is_finished() = 0;
     bool is_working = 0;
 

@@ -10,7 +10,7 @@
 #include "geometry_msgs/Vector3.h"
 #include "std_msgs/Float64MultiArray.h"
 
-#define FIRST_GAIT 1
+#define FIRST_GAIT 0
 
 /**
  * @brief send angle msg and stand
@@ -34,7 +34,7 @@ public:
     std_msgs::Float64MultiArray angle_real_data_last_;
 
 
-    virtual void run();
+    virtual void run(quad::STATE_INFO cur_state);
     virtual bool is_finished();
 
     StandWorker(ros::NodeHandle &nh);
@@ -62,7 +62,7 @@ StandWorker::~StandWorker() {
 
 }
 
-void StandWorker::run() {
+void StandWorker::run(quad::STATE_INFO cur_state) {
     ROS_INFO("Standing");
     this->cur_time_ = ros::Time::now().toSec();
     /*! delay for completing init*/

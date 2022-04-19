@@ -39,6 +39,23 @@ CMake Deprecation Warning at /usr/src/googletest/googletest/CMakeLists.txt:48 (c
 -- Using Python nosetests: /usr/bin/nosetests-2.7
 -- catkin 0.7.29
 -- BUILD_SHARED_LIBS is on
--- Configuring done
--- Generating done
--- Build files have been written to: /home/demphi/ros/quad_ws/src/main_controller/cmake-build-debug
+-- Could NOT find unitree_legged_msgs (missing: unitree_legged_msgs_DIR)
+-- Could not find the required component 'unitree_legged_msgs'. The following CMake error indicates that you either need to install the package with the same name or change your environment so that it can be found.
+CMake Error at /opt/ros/melodic/share/catkin/cmake/catkinConfig.cmake:83 (find_package):
+  Could not find a package configuration file provided by
+  "unitree_legged_msgs" with any of the following names:
+
+    unitree_legged_msgsConfig.cmake
+    unitree_legged_msgs-config.cmake
+
+  Add the installation prefix of "unitree_legged_msgs" to CMAKE_PREFIX_PATH
+  or set "unitree_legged_msgs_DIR" to a directory containing one of the above
+  files.  If "unitree_legged_msgs" provides a separate development package or
+  SDK, be sure it has been installed.
+Call Stack (most recent call first):
+  CMakeLists.txt:8 (find_package)
+
+
+-- Configuring incomplete, errors occurred!
+See also "/home/demphi/ros/quad_ws/src/main_controller/cmake-build-debug/CMakeFiles/CMakeOutput.log".
+See also "/home/demphi/ros/quad_ws/src/main_controller/cmake-build-debug/CMakeFiles/CMakeError.log".

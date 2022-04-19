@@ -25,7 +25,7 @@ public:
     Hopf* model_Hopf = new Hopf(model_CAR->Calculate_amplitude(), quad::PACE_BETA, quad::PACE_PHI);
     Eigen::Vector2f amplitude;
 
-    virtual void run();
+    virtual void run(quad::STATE_INFO cur_state);
     virtual bool is_finished();
 
     PaceWorker(ros::NodeHandle &nh);
@@ -50,7 +50,7 @@ PaceWorker::~PaceWorker() {
     delete this->model_Hopf;
 }
 
-void PaceWorker::run() {
+void PaceWorker::run(quad::STATE_INFO cur_state) {
     ROS_INFO("Pacing");
     std::cout << this->amplitude << std::endl;
     /*! LF should->hip->knee (0, 1, 2)*/

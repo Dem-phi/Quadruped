@@ -14,8 +14,12 @@
 #include "PaceWorker.h"
 #include "GallopWorker.h"
 
+#include "sensor_msgs/Imu.h"
+
 #include "Controllers/GaitScheduler.h"
 #include "Controllers/FootSwingTrajectory.h"
 #include "Controllers/LegController.h"
+#include "Controllers/PlanningContactPosition.h"
+#include "StateEstimate/StateEstimate.h"
 
 #endif
