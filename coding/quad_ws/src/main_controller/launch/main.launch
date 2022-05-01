@@ -4,6 +4,11 @@
     </node>
 
     <node pkg="main_controller" type="remap" name="remap" output="screen">
-
     </node>
+
+    <node pkg="joy" type="joy_node" name="turtle_joy" output="screen">
+        <param name="dev" type="string" value="/dev/input/js0" />
+    </node>
+
+
 </launch>

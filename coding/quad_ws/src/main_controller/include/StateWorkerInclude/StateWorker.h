@@ -16,11 +16,13 @@
 #include "Controllers/LegController.h"
 #include "Controllers/PlanningContactPosition.h"
 #include "StateEstimate/StateEstimate.h"
+#include "ConvexMPC/ConvexMPC.h"
+#include "CommandMapper/MapperToGazebo.h"
 
 class StateWorker{
 public:
     ros::NodeHandle nh;
-    virtual void run(quad::STATE_INFO cur_state) = 0;
+    virtual void run(STATE_INTERIOR *cur_state) = 0;
     virtual bool is_finished() = 0;
     bool is_working = 0;
 

@@ -18,10 +18,17 @@ struct LegControllerData{
     void zero(){
         p = Vec3::Zero();
         v = Vec3::Zero();
-        J = Mat22::Zero();
+        J_temp = Mat22::Zero();
+        J_temp_inv = Mat22::Zero();
+        J = Mat33::Zero();
+        J_inv = Mat33::Zero();
     }
     Vec3 p, v;
-    Mat22 J;
+    Mat22 J_temp;
+    Mat22 J_temp_inv;
+    Mat33 J;
+    Mat33 J_inv;
+
     /*! angle of three joints*/
     Vec3 q;
     Vec3 qd;
@@ -46,46 +53,45 @@ struct LegControllerCommand {
 
 class LegController{
 public:
-    double step_size_, period_time_, velocity_;
     double dt_;
     LegControllerCommand leg_command_[4];
     LegControllerData leg_data_[4];
 
     KinematicModel* model_kinematic = new KinematicModel();
 
-    LegController(double _velocity, double _period_time, double _dt){
+    LegController(){
         for (int i = 0; i < 4; i++) {
             this->leg_command_[i].zero();
             this->leg_data_[i].zero();
         }
-        this->velocity_ = _velocity;
-        this->period_time_ = _period_time;
-        this->dt_ = _dt;
-        this->step_size_ = this->velocity_*this->period_time_;
     }
     ~LegController(){
         delete this->model_kinematic;
     }
 
-    void FirstUpdateData(){
+    void FirstUpdateData(STATE_INTERIOR *cur_state){
+        this->dt_ = cur_state->plan_dt;
         for (int foot = 0; foot < 4; foot++) {
             this->leg_data_[foot].q(0) = 0.0;
-            if(foot == 0 || foot == 2){
-                this->leg_data_[foot].q(1) = 30/quad::Rad2Deg;
-            }else{
-                this->leg_data_[foot].q(1) = 30/quad::Rad2Deg;
-            }
+            this->leg_data_[foot].q(1) = 30/quad::Rad2Deg;
             this->leg_data_[foot].q(2) = -60/quad::Rad2Deg;
             this->leg_data_[foot].p = this->model_kinematic->ForwardKinematic(foot, this->leg_data_[foot].q);
-            ComputeJacobian(this->leg_data_[foot].q, &this->leg_data_[foot].J, foot);
+            ComputeJacobian(this->leg_data_[foot].q, &this->leg_data_[foot].J_temp, foot);
 
             //update velocity by Jacobian
             Vec2 temp_v;
             temp_v.x() = this->leg_data_[foot].qd.y();
             temp_v.y() = this->leg_data_[foot].qd.z();
-            Vec2 temp_ = this->leg_data_[foot].J * temp_v;
+            Vec2 temp_ = this->leg_data_[foot].J_temp * temp_v;
             this->leg_data_[foot].v << temp_.x(), 0.0, temp_.y();
+            /*! Update to state interior */
+            cur_state->foot_p_robot.block<3, 1>(0, foot) = this->leg_data_[foot].p;
+            cur_state->foot_v_robot.block<3, 1>(0, foot) = this->leg_data_[foot].v;
+            cur_state->foot_q.block<3, 1>(0, foot) = this->leg_data_[foot].q;
+            cur_state->foot_qd.block<3, 1>(0, foot) = this->leg_data_[foot].qd;
         }
+
+
     }
 
     void UpdateData(){
@@ -96,37 +102,30 @@ public:
                 this->leg_data_[foot].qd(joint) = this->leg_command_[foot].qdDes(joint);
             }
             this->leg_data_[foot].p = this->model_kinematic->ForwardKinematic(foot, this->leg_data_[foot].q);
-            ComputeJacobian(this->leg_data_[foot].q, &this->leg_data_[foot].J, foot);
-
+            ComputeJacobian(this->leg_data_[foot].q, &this->leg_data_[foot].J_temp, foot);
+            this->leg_data_[foot].J_temp_inv = this->leg_data_[foot].J_temp.inverse();
+            this->leg_data_[foot].J <<  0, this->leg_data_[foot].J_temp(0,0), this->leg_data_[foot].J_temp(0,1),
+                    0, 0, 0,
+                    0, this->leg_data_[foot].J_temp(1,0), this->leg_data_[foot].J_temp(1, 1);
+            this->leg_data_[foot].J_inv <<  0, 0, 0,
+                    this->leg_data_[foot].J_temp_inv(0,0), 0, this->leg_data_[foot].J_temp_inv(0,1),
+                    this->leg_data_[foot].J_temp_inv(1,0), 0, this->leg_data_[foot].J_temp_inv(1,1);
             //update velocity by Jacobian
             Vec2 temp_v;
             temp_v.x() = this->leg_data_[foot].qd.y();
             temp_v.y() = this->leg_data_[foot].qd.z();
-            Vec2 temp_ = this->leg_data_[foot].J * temp_v;
+            Vec2 temp_ = this->leg_data_[foot].J_temp * temp_v;
             this->leg_data_[foot].v << temp_.x(), 0.0, temp_.y();
         }
     }
 
     void UpdateCommand(){
-/*        for (int foot = 0; foot < 4; foot++) {
-            this->leg_command_[foot].qDes = this->leg_data_[foot].q;
-            Vec2 temp_v;
-            temp_v.x() = this->leg_command_[foot].vDes.x();
-            temp_v.y() = this->leg_command_[foot].vDes.z();
-            Vec2 temp_ = this->leg_data_[foot].J.inverse()*temp_v*this->dt_;
-            this->leg_command_[foot].qDes.y() += temp_.x();
-            this->leg_command_[foot].qDes.z() += temp_.y();
-
-            // add a PD controller
-
-        }*/
-
         for (int foot = 0; foot < 4; foot++) {
             this->leg_command_[foot].qDes = this->model_kinematic->InverseKinematic(foot, this->leg_command_[foot].pDes);
             Vec2 temp_v;
             temp_v.x() = this->leg_command_[foot].vDes.x();
             temp_v.y() = this->leg_command_[foot].vDes.z();
-            Vec2 temp_ = this->leg_data_[foot].J.inverse()*temp_v;
+            Vec2 temp_ = this->leg_data_[foot].J_temp.inverse()*temp_v;
             this->leg_command_[foot].qdDes.y() = temp_.x();
             this->leg_command_[foot].qdDes.z() = temp_.y();
         }
@@ -147,7 +146,6 @@ public:
         J->operator()(0, 1) = l2*c12;
         J->operator()(1,0) = l1*s1+l2* s12;
         J->operator()(1,1) = l2*s12;
-
     }
 
     void SetData(std_msgs::Float64MultiArray* angle_gazebo_data_){

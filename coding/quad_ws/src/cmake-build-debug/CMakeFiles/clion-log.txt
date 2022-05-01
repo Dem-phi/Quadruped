@@ -1,0 +1,80 @@
+/home/demphi/App/clion/clion-2021.2.2/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_DEPENDS_USE_COMPILER=FALSE -G "CodeBlocks - Unix Makefiles" /home/demphi/ros/quad_ws/src
+-- Using CATKIN_DEVEL_PREFIX: /home/demphi/ros/quad_ws/src/cmake-build-debug/devel
+-- Using CMAKE_PREFIX_PATH: /home/demphi/GitHub/livox_ws/devel;/opt/ros/melodic
+-- This workspace overlays: /home/demphi/GitHub/livox_ws/devel;/opt/ros/melodic
+-- Found PythonInterp: /usr/bin/python2 (found suitable version "2.7.17", minimum required is "2") 
+-- Using PYTHON_EXECUTABLE: /usr/bin/python2
+-- Using Debian Python package layout
+-- Using empy: /usr/bin/empy
+-- Using CATKIN_ENABLE_TESTING: ON
+-- Call enable_testing()
+-- Using CATKIN_TEST_RESULTS_DIR: /home/demphi/ros/quad_ws/src/cmake-build-debug/test_results
+-- Found gtest sources under '/usr/src/googletest': gtests will be built
+-- Found gmock sources under '/usr/src/googletest': gmock will be built
+CMake Deprecation Warning at /usr/src/googletest/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 2.8.12 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value or use a ...<max> suffix to tell
+  CMake that the project does not need compatibility with older versions.
+
+
+CMake Deprecation Warning at /usr/src/googletest/googlemock/CMakeLists.txt:41 (cmake_minimum_required):
+  Compatibility with CMake < 2.8.12 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value or use a ...<max> suffix to tell
+  CMake that the project does not need compatibility with older versions.
+
+
+CMake Deprecation Warning at /usr/src/googletest/googletest/CMakeLists.txt:48 (cmake_minimum_required):
+  Compatibility with CMake < 2.8.12 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value or use a ...<max> suffix to tell
+  CMake that the project does not need compatibility with older versions.
+
+
+-- Found PythonInterp: /usr/bin/python2 (found version "2.7.17") 
+-- Using Python nosetests: /usr/bin/nosetests-2.7
+-- catkin 0.7.29
+-- BUILD_SHARED_LIBS is on
+-- BUILD_SHARED_LIBS is on
+-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-- ~~  traversing 4 packages in topological order:
+-- ~~  - cheetah_model
+-- ~~  - unitree_legged_msgs
+-- ~~  - main_controller
+-- ~~  - wtr_serial
+-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-- +++ processing catkin package: 'cheetah_model'
+-- ==> add_subdirectory(cheetah_model)
+CMake Deprecation Warning at cheetah_model/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 2.8.12 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value or use a ...<max> suffix to tell
+  CMake that the project does not need compatibility with older versions.
+
+
+-- +++ processing catkin package: 'unitree_legged_msgs'
+-- ==> add_subdirectory(unitree_legged_msgs)
+CMake Deprecation Warning at unitree_legged_msgs/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 2.8.12 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value or use a ...<max> suffix to tell
+  CMake that the project does not need compatibility with older versions.
+
+
+-- Using these message generators: gencpp;geneus;genlisp;gennodejs;genpy
+-- unitree_legged_msgs: 11 messages, 0 services
+-- +++ processing catkin package: 'main_controller'
+-- ==> add_subdirectory(main_controller)
+-- +++ processing catkin package: 'wtr_serial'
+-- ==> add_subdirectory(wtr-serial)
+-- Using these message generators: gencpp;geneus;genlisp;gennodejs;genpy
+-- wtr_serial: 1 messages, 0 services
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/demphi/ros/quad_ws/src/cmake-build-debug

@@ -5,8 +5,7 @@
 #include "ros/ros.h"
 #include "std_msgs/Float64.h"
 #include "std_msgs/Float64MultiArray.h"
-#include "unitree_legged_msgs/MotorCmd.h"
-#include "unitree_legged_msgs/MotorState.h"
+
 
 // LF -> RF -> RH -> RF
 // shoulder -> thigh -> knee

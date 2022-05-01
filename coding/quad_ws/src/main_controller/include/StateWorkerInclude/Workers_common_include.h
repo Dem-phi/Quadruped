@@ -21,5 +21,7 @@
 #include "Controllers/LegController.h"
 #include "Controllers/PlanningContactPosition.h"
 #include "StateEstimate/StateEstimate.h"
+#include "ConvexMPC/Solver.h"
+#include "CommandMapper/MapperToGazebo.h"
 
 #endif

@@ -43,28 +43,16 @@ public:
 
     }
 
-    void UpdateOrientationData(quad::STATE_INFO _state_info){
-        this->state_data_.orientation_.x() = _state_info.cur_state.orientation.x;
-        this->state_data_.orientation_.y() = _state_info.cur_state.orientation.y;
-        this->state_data_.orientation_.z() = _state_info.cur_state.orientation.z;
-        this->state_data_.orientation_.w() = _state_info.cur_state.orientation.w;
+    void UpdateOrientationData(STATE_INTERIOR _state_interior){
+        this->state_data_.orientation_ = _state_interior.quaternion;
+        this->state_data_.rBody_ = _state_interior.rotate_matrix;
 
-        this->state_data_.rBody_ = this->state_data_.orientation_.toRotationMatrix();
-
-        this->state_data_.omega_body_.x() = _state_info.b_twist.angular.x;
-        this->state_data_.omega_body_.y() = _state_info.b_twist.angular.y;
-        this->state_data_.omega_body_.z() = _state_info.b_twist.angular.z;
+        this->state_data_.omega_body_ = _state_interior.b_angle_vel;
 
         this->state_data_.omega_world_ = this->state_data_.rBody_.transpose()*this->state_data_.omega_body_;
 
-        this->state_data_.rpy_.x() = _state_info.rpy_angle.x;
-        this->state_data_.rpy_.y() = _state_info.rpy_angle.y;
-        this->state_data_.rpy_.z() = _state_info.rpy_angle.z;
-
-        this->state_data_.aBody_.x() = _state_info.b_linear_acceleration.x;
-        this->state_data_.aBody_.y() = _state_info.b_linear_acceleration.y;
-        this->state_data_.aBody_.z() = _state_info.b_linear_acceleration.z;
-
+        this->state_data_.rpy_ = _state_interior.cur_rpy;
+        this->state_data_.aBody_ = _state_interior.b_acc;
         this->state_data_.aWorld_ = this->state_data_.rBody_.transpose()*this->state_data_.aBody_;
     }
 
@@ -111,7 +99,7 @@ public:
     /*!
      * Get the position and velocity
      * */
-    void LinearKF(LegControllerData _leg_data[4], Vec4 _contact_phase){
+    void LinearKF(Eigen::Matrix<double, 3, quad::NUM_LEG> _foot_p, Eigen::Matrix<double, 3, quad::NUM_LEG> _foot_v, Vec4 _contact_phase){
         Eigen::Matrix<double, 18, 18> Q = Eigen::Matrix<double, 18, 18>::Identity();
         Q.block(0, 0, 3, 3) = _Q0.block(0, 0, 3, 3) * this->imu_process_noise_position;
         Q.block(3, 3, 3, 3) = _Q0.block(3, 3, 3, 3) * this->imu_process_noise_velocity;
@@ -145,7 +133,7 @@ public:
         /*!（5）卡尔曼滤波的状态预测部分,计算机器人躯干的位置、速度和触地状态 */
         for (int i = 0; i < 4; i++) {
             int i1 = 3 * i;
-            Vec3 ph;                                        //计算相对于CoM的髋部位置，即机器人坐标系中腿的臀部位置
+/*            Vec3 ph;                                        //计算相对于CoM的髋部位置，即机器人坐标系中腿的臀部位置
             // Set X axis offset
             if(i == 0 || i == 1){
                 ph.x() = quad::X_OFFSET;
@@ -157,10 +145,9 @@ public:
                 ph.y() = quad::Y_OFFSET;
             }else{
                 ph.y() = -quad::Y_OFFSET;
-            }
-
-            Vec3 p_rel = ph + _leg_data[i].p;                  //计算世界坐标系下机器人真正的位置= 机器人坐标系中腿的臀部位置+腿的位置
-            Vec3 dp_rel = _leg_data[i].v;                      //计算世界坐标系下机器人真正的速度= 状态估计器中每条的速度
+            }*/
+            Vec3 p_rel = _foot_p.block<3, 1>(0, i);                  //计算世界坐标系下机器人真正的位置= 机器人坐标系中腿的臀部位置+腿的位置
+            Vec3 dp_rel = _foot_v.block<3, 1>(0, i);                      //计算世界坐标系下机器人真正的速度= 状态估计器中每条的速度
             Vec3 p_f = Rbod * p_rel;                        //计算身体坐标系下机器人真正的位置= 身体坐标系下的旋转矩阵*世界坐标系下机器人真正的位置
             Vec3 dp_f =Rbod *(this->state_data_.omega_body_.cross(p_rel) + dp_rel);     //计算身体坐标系下机器人真正的速度=     身体坐标系下的旋转矩阵*（躯干坐标系中的角速度正交阵+世界坐标系下机器人真正的速度）
 
@@ -259,20 +246,11 @@ public:
     /*!
     * @return : the data of position velocity_w velocity body
     * */
-    std_msgs::Float64MultiArray getData(){
-        std_msgs::Float64MultiArray data_;
-        data_.data.resize(9);
-        data_.data[0] = this->state_data_.position_.x();
-        data_.data[1] = this->state_data_.position_.y();
-        data_.data[2] = this->state_data_.position_.z();
-
-        data_.data[3] = this->state_data_.vWorld_.x();
-        data_.data[4] = this->state_data_.vWorld_.y();
-        data_.data[5] = this->state_data_.vWorld_.z();
-
-        data_.data[6] = this->state_data_.vBody_.x();
-        data_.data[7] = this->state_data_.vBody_.y();
-        data_.data[8] = this->state_data_.vBody_.z();
+    Eigen::Matrix<double, 3, 3> getData(){
+        Eigen::Matrix<double, 3, 3> data_;
+        data_.block<3, 1>(0, 0) = this->state_data_.position_;
+        data_.block<3, 1>(0, 1) = this->state_data_.vWorld_;
+        data_.block<3, 1>(0, 2) = this->state_data_.vBody_;
         return data_;
     }
 

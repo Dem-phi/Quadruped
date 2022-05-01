@@ -2,6 +2,8 @@
 // Created by demphi on 2022/3/30.
 //
 
+/*! no use */
+
 #ifndef _PLANNINGCONTACTPOSITION_
 #define _PLANNINGCONTACTPOSITION_
 

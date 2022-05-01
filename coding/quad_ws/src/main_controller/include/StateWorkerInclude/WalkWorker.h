@@ -28,7 +28,7 @@ public:
     Hopf* model_Hopf = new Hopf(model_CAR->Calculate_amplitude(), quad::WALK_BETA, quad::WALK_PHI);
     Eigen::Vector2f amplitude;
 
-    virtual void run(quad::STATE_INFO cur_state);
+    virtual void run(STATE_INTERIOR *cur_state);
     virtual bool is_finished();
 
     WalkWorker(ros::NodeHandle &nh, float velocity);
@@ -55,7 +55,7 @@ WalkWorker::~WalkWorker() {
     delete this->model_Hopf;
 }
 
-void WalkWorker::run(quad::STATE_INFO cur_state) {
+void WalkWorker::run(STATE_INTERIOR *cur_state) {
     ROS_INFO("Walking");
     std::cout << this->amplitude << std::endl;
     /*! LF should->hip->knee (0, 1, 2)*/

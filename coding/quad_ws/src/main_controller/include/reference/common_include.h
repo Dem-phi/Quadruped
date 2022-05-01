@@ -6,6 +6,7 @@
 #define REFERENCE_COMMON_INCLUDE_
 
 #include "iostream"
+#include <chrono>
 
 // ROS
 #include <ros/ros.h>
@@ -31,6 +32,7 @@
 //Eigen
 #include <eigen3/Eigen/Geometry>
 #include <eigen3/Eigen/Core>
+#include "eigen3/Eigen/Eigen"
 
 #define PI 3.1415926535
 
