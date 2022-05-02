@@ -1,8 +1,0 @@
-prefix=/home/demphi/ros/quad_ws/install
-
-Name: dog_v4
-Description: Description of dog_v4
-Version: 1.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 

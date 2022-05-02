@@ -1,8 +1,0 @@
-prefix=/home/demphi/ros/quad_ws/devel
-
-Name: wtr_dog
-Description: Description of wtr_dog
-Version: 1.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 

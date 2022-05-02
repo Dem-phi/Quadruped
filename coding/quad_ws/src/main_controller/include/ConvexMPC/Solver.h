@@ -40,10 +40,10 @@ public:
     }
 
     void InitParams(){
-        std::cout << " Init QP Solver, MPC Parameters" << std::endl;
+        ROS_INFO("[MPC SOLVER] Init QP Solver, MPC Parameters");
         Q.diagonal() << 1.0, 1.0, 1.0, 400.0, 400.0, 100.0;
         R = 1e-3;
-        mu = 0.3;
+        mu = 0.7;
         F_min = 0;
         F_max = 180;
         hessian.resize(3 * NUM_LEG, 3 * NUM_LEG);
@@ -82,47 +82,57 @@ public:
 
 
     /*! Use contact force to Calculate joint torques */
-    void Calculate_joint_torques(STATE_INTERIOR &stateInterior){
+    Eigen::Matrix<double, NUM_DOF, 1> Calculate_joint_torques(STATE_INTERIOR &stateInterior){
         Eigen::Matrix<double, NUM_DOF, 1> joint_torques;
         joint_torques.setZero();
         mpc_init_counter++;
         // for the first 10 ticks, just return zero torques.
-        if(mpc_init_counter < 10){
+        if(mpc_init_counter < 0){
             stateInterior.joint_torques = joint_torques;
         }else{
             // for each leg, if it is a swing leg (contact[i] is false), use foot_force_kin getting joint_torque
             // for each leg, if it is a stance leg (contact[i] is true), use foot_contact_force getting joint_torque
             for (int i = 0; i < NUM_LEG; i++) {
-                if(stateInterior.contacts[i]){
+                Eigen::Matrix3d jac = stateInterior.foot_jacobian.block<3, 3>(3 * i, 3 * i);
+                if (stateInterior.contacts[i] == 1) {
                     // stance
-
-                }else{
+                    joint_torques.segment<3>(i * 3) = jac.transpose()
+                                                      * -stateInterior.foot_contact_force.block<3, 1>(0, i);
+                } else {
                     // swing
+                    Eigen::Vector3d force_tgt = stateInterior.km_foot.cwiseProduct(
+                            stateInterior.foot_forces_swing.block<3, 1>(0, i));
+                    // X = A.lu().solve(b)
+                    //joint_torques.segment<3>(i * 3) = jac.lu().solve(force_tgt); // LU分解, jac * tau = F
+                    joint_torques.segment<3>(i*3) = jac.transpose() * force_tgt;
                 }
             }
+            // add gravity compensation
+            joint_torques += stateInterior.torques_gravity;
 
             // prevent nan
-            for (int i = 0; i < 12; ++i) {
+            for (int i = 0; i < 12; i++) {
                 if (!isnan(joint_torques[i]))
                     stateInterior.joint_torques[i] = joint_torques[i];
             }
+
+            return joint_torques;
         }
     }
 
     /*! Contact force -> [fx fy fz] * 4 */
     Eigen::Matrix<double, 3, NUM_LEG> Calculate_contact_force(STATE_INTERIOR &stateInterior){
         Eigen::Matrix<double, 3, NUM_LEG> foot_contact_force;
-        Eigen::Vector3d rpy_error = stateInterior.last_rpy - stateInterior.cur_rpy;
+        Eigen::Vector3d rpy_error = stateInterior.command_rpy - stateInterior.cur_rpy;
         // limit euler error to pi/2
         if (rpy_error(2) > 3.1415926 * 1.5) {
-            rpy_error(2) = stateInterior.last_rpy(2) - 3.1415926 * 2 - stateInterior.cur_rpy(2);
+            rpy_error(2) = stateInterior.command_rpy(2) - 3.1415926 * 2 - stateInterior.cur_rpy(2);
         } else if (rpy_error(2) < -3.1415926 * 1.5) {
-            rpy_error(2) = stateInterior.last_rpy(2) + 3.1415926 * 2 - stateInterior.cur_rpy(2);
+            rpy_error(2) = stateInterior.command_rpy(2) + 3.1415926 * 2 - stateInterior.cur_rpy(2);
         }
         if(stateInterior.leg_control_type == 0){
             // no use ???
         }
-        // Robot in other gait, need to use MPC
         else if (stateInterior.leg_control_type == 1){
             ConvexMPC mpc_solver = ConvexMPC(stateInterior.q_weights, stateInterior.r_weights);
             mpc_solver.Reset();
@@ -142,12 +152,12 @@ public:
             // initialize the desired mpc states trajectory
             for (int i = 0; i < PLAN_HORIZON; i++) {
                 stateInterior.mpc_states_list.segment(i * 13, 13) <<
-                    stateInterior.last_rpy.x(),
-                    stateInterior.last_rpy.y(),
-                    stateInterior.cur_rpy.z() + stateInterior.b_angle_vel.z() * mpc_dt * (i+1),
+                    stateInterior.command_rpy.x(),
+                    stateInterior.command_rpy.y(),
+                    stateInterior.cur_rpy.z() + stateInterior.command_angle_vel.z() * mpc_dt * (i+1),
                     stateInterior.cur_position.x() + stateInterior.command_vel.x() * mpc_dt * (i+1),
                     stateInterior.cur_position.y() + stateInterior.command_vel.y() * mpc_dt * (i+1),
-                    stateInterior.cur_position.z(),
+                    stateInterior.cur_position.z(), // desired position z = current position z
                     stateInterior.command_angle_vel.x(),
                     stateInterior.command_angle_vel.y(),
                     stateInterior.command_angle_vel.z(),
@@ -155,6 +165,8 @@ public:
                     stateInterior.command_vel.y(),
                     0, -9.8;
             }
+
+
             // a single A_hat_c is computed for the entire reference trajectory
             mpc_solver.Calculate_A_hat_c(stateInterior.cur_rpy);
             // for each point in the reference trajectory, an approximate B_c matrix is computed using desired values of euler angles and feet positions
@@ -188,6 +200,7 @@ public:
                 solver.data()->setLowerBound(mpc_solver.lb);
                 solver.data()->setUpperBound(mpc_solver.ub);
                 solver.initSolver();
+
             }else{
                 solver.updateHessianMatrix(mpc_solver.hessian);
                 solver.updateGradient(mpc_solver.gradient);

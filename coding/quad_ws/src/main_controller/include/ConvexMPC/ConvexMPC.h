@@ -16,25 +16,21 @@ public:
     /*! Weight Matrix*/
     Eigen::Matrix<double, quad::MPC_STATE_DIM*quad::PLAN_HORIZON, 1> q_weights_mpc;
     Eigen::Matrix<double, quad::NUM_DOF*quad::PLAN_HORIZON, 1> r_weights_mpc;
-    Eigen::DiagonalMatrix<double, quad::MPC_STATE_DIM*quad::PLAN_HORIZON> Q;
-    Eigen::DiagonalMatrix<double, quad::NUM_DOF*quad::PLAN_HORIZON>R;
+    Eigen::MatrixXd Q;
+    Eigen::MatrixXd R;
     Eigen::SparseMatrix<double> Q_sparse;
     Eigen::SparseMatrix<double> R_sparse;
-
 
     /*! Continue Time Dynamics */
     Eigen::Matrix<double, quad::MPC_STATE_DIM, quad::MPC_STATE_DIM> A_hat_c;
     Eigen::Matrix<double, quad::MPC_STATE_DIM, quad::NUM_DOF> B_hat_c;
     Eigen::Matrix<double, quad::MPC_STATE_DIM + quad::NUM_DOF, quad::MPC_STATE_DIM + quad::NUM_DOF> AB_hat_c;
 
-
     /*! Discrete Time Dynamics*/
     Eigen::Matrix<double, quad::MPC_STATE_DIM, quad::MPC_STATE_DIM> A_hat_d;
     Eigen::Matrix<double, quad::MPC_STATE_DIM, quad::NUM_DOF> B_hat_d;
     Eigen::Matrix<double, quad::MPC_STATE_DIM + quad::NUM_DOF, quad::MPC_STATE_DIM + quad::NUM_DOF> AB_hat_d;
     Eigen::Matrix<double, quad::MPC_STATE_DIM * quad::PLAN_HORIZON, quad::NUM_DOF> B_hat_d_list;
-
-
 
     /*! QP Formulation */
     Eigen::Matrix<double, quad::MPC_STATE_DIM*quad::PLAN_HORIZON, quad::MPC_STATE_DIM> A_qp;
@@ -50,6 +46,10 @@ public:
     Eigen::Matrix<double, quad::MPC_CONSTRAINT_DIM*quad::PLAN_HORIZON, 1> ub;
 
     ConvexMPC(Eigen::VectorXd &_q_weights, Eigen::VectorXd &_r_weights){
+        this->mu = 0.3;
+        this->Q.resize(quad::MPC_STATE_DIM * quad::PLAN_HORIZON, quad::MPC_STATE_DIM * quad::PLAN_HORIZON);
+        this->R.resize(quad::NUM_DOF * quad::PLAN_HORIZON, quad::NUM_DOF * quad::PLAN_HORIZON);
+
         //reserve size for sparse matrix
         this->Q_sparse = Eigen::SparseMatrix<double>(quad::MPC_STATE_DIM*quad::PLAN_HORIZON,
                                                      quad::MPC_STATE_DIM*quad::PLAN_HORIZON);
@@ -64,7 +64,9 @@ public:
             this->q_weights_mpc.segment(i*quad::MPC_STATE_DIM, quad::MPC_STATE_DIM) = _q_weights;
         }
         /*! why should multiply 2 ? */
-        this->Q.diagonal() = 2*this->q_weights_mpc;
+        for (int i = 0; i < quad::MPC_STATE_DIM * quad::PLAN_HORIZON; i++) {
+            this->Q(i,i) = 2*this->q_weights_mpc(i);
+        }
         for (int i = 0; i < quad::MPC_STATE_DIM*quad::PLAN_HORIZON ; i++) {
             this->Q_sparse.insert(i, i) = 2*this->q_weights_mpc(i);
         }
@@ -73,7 +75,10 @@ public:
         for (int i = 0; i < quad::PLAN_HORIZON; i++) {
             this->r_weights_mpc.segment(i*quad::NUM_DOF, quad::NUM_DOF) = _r_weights;
         }
-        this->R.diagonal() = 2*this->r_weights_mpc;
+        //this->R.diagonal() = 2*this->r_weights_mpc;
+        for (int i = 0; i < quad::NUM_DOF * quad::PLAN_HORIZON; i++) {
+            this->R(i, i) = 2*this->r_weights_mpc(i);
+        }
         for (int i = 0; i < quad::PLAN_HORIZON*quad::NUM_DOF; i++) {
             this->R_sparse.insert(i, i) = 2*this->r_weights_mpc(i);
         }
@@ -101,11 +106,6 @@ public:
 
     /*! Init and Reset Matrix to Zero*/
     void Reset(){
-        q_weights_mpc.setZero();
-        r_weights_mpc.setZero();
-        Q.setZero();
-        R.setZero();
-
         A_hat_c.setZero();
         B_hat_c.setZero();
         AB_hat_c.setZero();
@@ -149,6 +149,7 @@ public:
             this->B_hat_c.block<3, 3>(9, 3*i) =
                     (1/_robot_mass)*Eigen::Matrix3d::Identity();
         }
+
     }
 
     /*! State Space Discrete */
@@ -175,7 +176,7 @@ public:
                 }else{
                     this->B_qp.block<quad::MPC_STATE_DIM, quad::NUM_DOF>(quad::MPC_STATE_DIM*i, quad::NUM_DOF*j) =
                             this->A_qp.block<quad::MPC_STATE_DIM, quad::MPC_STATE_DIM>(quad::MPC_STATE_DIM*(i-j-1), 0)
-                                    * this->B_qp.block<quad::MPC_STATE_DIM, quad::NUM_DOF>(j*quad::MPC_STATE_DIM, 0);
+                                    * this->B_hat_d_list.block<quad::MPC_STATE_DIM, quad::NUM_DOF>(j*quad::MPC_STATE_DIM, 0);
                 }
             }
         }
@@ -183,10 +184,9 @@ public:
         // transform to QP Problems
         // Calculate Hessian
         Eigen::Matrix<double, quad::NUM_DOF*quad::PLAN_HORIZON, quad::NUM_DOF*quad::PLAN_HORIZON> dense_hessian;
-        dense_hessian = (this->B_qp.transpose() * this->Q * this->B_qp);
-        dense_hessian += this->R;
-        //以稀疏矩阵存储
+        dense_hessian = (this->B_qp.transpose() * this->Q * this->B_qp) + this->R;
         this->hessian = dense_hessian.sparseView();
+
         // calculate gradient
         Eigen::Matrix<double, 13*quad::PLAN_HORIZON, 1> tmp_vec = this->A_qp* state.mpc_states;
         tmp_vec -= state.mpc_states_list;

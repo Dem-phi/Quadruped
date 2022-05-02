@@ -77,6 +77,13 @@ public:
             this->leg_data_[foot].q(2) = -60/quad::Rad2Deg;
             this->leg_data_[foot].p = this->model_kinematic->ForwardKinematic(foot, this->leg_data_[foot].q);
             ComputeJacobian(this->leg_data_[foot].q, &this->leg_data_[foot].J_temp, foot);
+            this->leg_data_[foot].J_temp_inv = this->leg_data_[foot].J_temp.inverse();
+            this->leg_data_[foot].J <<  0, this->leg_data_[foot].J_temp(0,0), this->leg_data_[foot].J_temp(0,1),
+                    0, 0, 0,
+                    0, this->leg_data_[foot].J_temp(1,0), this->leg_data_[foot].J_temp(1, 1);
+            this->leg_data_[foot].J_inv <<  0, 0, 0,
+                    this->leg_data_[foot].J_temp_inv(0,0), 0, this->leg_data_[foot].J_temp_inv(0,1),
+                    this->leg_data_[foot].J_temp_inv(1,0), 0, this->leg_data_[foot].J_temp_inv(1,1);
 
             //update velocity by Jacobian
             Vec2 temp_v;
@@ -86,9 +93,13 @@ public:
             this->leg_data_[foot].v << temp_.x(), 0.0, temp_.y();
             /*! Update to state interior */
             cur_state->foot_p_robot.block<3, 1>(0, foot) = this->leg_data_[foot].p;
-            cur_state->foot_v_robot.block<3, 1>(0, foot) = this->leg_data_[foot].v;
+            cur_state->foot_v_robot.block<3, 1>(0, foot) << 0, 0, 0;
             cur_state->foot_q.block<3, 1>(0, foot) = this->leg_data_[foot].q;
             cur_state->foot_qd.block<3, 1>(0, foot) = this->leg_data_[foot].qd;
+            cur_state->foot_p_abs.block<3, 1>(0, foot) =
+                    cur_state->rotate_matrix * cur_state->foot_p_robot.block<3, 1>(0, foot);
+            cur_state->foot_p.block<3, 1>(0, foot) =
+                    cur_state->foot_p_abs.block<3, 1>(0, foot) + cur_state->cur_position;
         }
 
 
@@ -96,11 +107,6 @@ public:
 
     void UpdateData(){
         for (int foot = 0; foot < 4; foot++) {
-            for(int joint = 0; joint < 3; joint++){
-                // Assume the command is fully completed
-                this->leg_data_[foot].q(joint) = this->leg_command_[foot].qDes(joint);
-                this->leg_data_[foot].qd(joint) = this->leg_command_[foot].qdDes(joint);
-            }
             this->leg_data_[foot].p = this->model_kinematic->ForwardKinematic(foot, this->leg_data_[foot].q);
             ComputeJacobian(this->leg_data_[foot].q, &this->leg_data_[foot].J_temp, foot);
             this->leg_data_[foot].J_temp_inv = this->leg_data_[foot].J_temp.inverse();
@@ -110,6 +116,7 @@ public:
             this->leg_data_[foot].J_inv <<  0, 0, 0,
                     this->leg_data_[foot].J_temp_inv(0,0), 0, this->leg_data_[foot].J_temp_inv(0,1),
                     this->leg_data_[foot].J_temp_inv(1,0), 0, this->leg_data_[foot].J_temp_inv(1,1);
+            //this->leg_data_[foot].J_inv = this->leg_data_[foot].J.inverse();
             //update velocity by Jacobian
             Vec2 temp_v;
             temp_v.x() = this->leg_data_[foot].qd.y();

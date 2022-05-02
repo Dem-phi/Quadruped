@@ -36,10 +36,10 @@ namespace quad{
     const Eigen::Vector4f GALLOP_PHI = {0, 0, 0.5, 0.5};
 
     /*! dog constant */
-    const double X_OFFSET = 0.3;
-    const double Y_OFFSET = 0.2;
-    const double HIP_LENGTH = 0.4;
-    const double KNEE_LENGTH = 0.4;
+    const double X_OFFSET = 0.17;
+    const double Y_OFFSET = 0.05;
+    const double HIP_LENGTH = 0.2;
+    const double KNEE_LENGTH = 0.2;
     const int NUM_DOF = 12;
     const int NUM_LEG = 4;
 

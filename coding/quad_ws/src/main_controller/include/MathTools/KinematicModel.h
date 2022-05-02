@@ -9,8 +9,8 @@
 
 class KinematicModel{
 public:
-    const double X_OFFSET = 0.3;
-    const double Y_OFFSET = 0.2;
+    const double X_OFFSET = quad::X_OFFSET;
+    const double Y_OFFSET = quad::Y_OFFSET;
     double l1 = quad::HIP_LENGTH;
     double l2 = quad::KNEE_LENGTH;
     Vec3 init_p_[4];

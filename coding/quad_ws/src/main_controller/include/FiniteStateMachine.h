@@ -13,10 +13,11 @@ class FSM{
 private:
     /*! main loop function runs in a specific frequency */
     ros::Timer FSM_Timer_;
-
+    /*! Publish Interior msg */
     ros::Publisher position_pub_, velocity_pub_, euler_pub_;
     /*! Publish Control msg */
     ros::Publisher angle_gazebo_pub_, angle_real_pub_;
+    ros::Publisher pub_joint_cmd[12];
 
     ros::Subscriber motor_sub_, imu_sub_, joy_sub_;
     ros::Subscriber sub_joint_msg[12];
@@ -30,11 +31,10 @@ public:
 
     STATE_INTERIOR state_interior_ ;
 
-
-
     /*! Class for control */
     StateEstimate* model_StateEstimate = new StateEstimate();
     LegController* model_LegController = new LegController();
+    Solver mpc_solver;
 
     FSM(ros::NodeHandle &nh);
     ~FSM();
@@ -45,6 +45,7 @@ public:
     /*! Update Data to some class*/
     void Update_LegController();
     void Update_StateEstimate();
+    void SendCommand();
 
     /*! Callback Function */
     void MotorCallback(const std_msgs::Float64MultiArray &msg);
@@ -81,23 +82,35 @@ FSM::FSM(ros::NodeHandle &nh) {
     this->angle_real_pub_ = this->nh_.advertise<std_msgs::Float64MultiArray>(
             "/quad/set_angle", 1);
 
+    this->pub_joint_cmd[0] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/FL_hip_controller/command", 1);
+    this->pub_joint_cmd[1] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/FL_thigh_controller/command", 1);
+    this->pub_joint_cmd[2] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/FL_calf_controller/command", 1);
+    this->pub_joint_cmd[3] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/FR_hip_controller/command", 1);
+    this->pub_joint_cmd[4] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/FR_thigh_controller/command", 1);
+    this->pub_joint_cmd[5] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/FR_calf_controller/command", 1);
+    this->pub_joint_cmd[6] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/RL_hip_controller/command", 1);
+    this->pub_joint_cmd[7] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/RL_thigh_controller/command", 1);
+    this->pub_joint_cmd[8] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/RL_calf_controller/command", 1);
+    this->pub_joint_cmd[9] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/RR_hip_controller/command", 1);
+    this->pub_joint_cmd[10] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/RR_thigh_controller/command", 1);
+    this->pub_joint_cmd[11] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/RR_calf_controller/command", 1);
+
     this->motor_sub_ = this->nh_.subscribe("/quad/motor_info", 1000, &FSM::MotorCallback ,this);
     this->imu_sub_ = this->nh_.subscribe("/body_imu", 1000, &FSM::IMUCallback, this);
     this->joy_sub_ = this->nh_.subscribe("/joy", 1000, &FSM::JoyCallback, this);
 
-
-    this->sub_joint_msg[0] = this->nh_.subscribe("/aliengo_gazebo/FL_hip_controller/state", 2, &FSM::FL_hip_state_callback, this);
-    this->sub_joint_msg[1] = this->nh_.subscribe("/aliengo_gazebo/FL_thigh_controller/state", 2, &FSM::FL_thigh_state_callback, this);
-    this->sub_joint_msg[2] = this->nh_.subscribe("/aliengo_gazebo/FL_calf_controller/state", 2, &FSM::FL_calf_state_callback, this);
-    this->sub_joint_msg[3] = this->nh_.subscribe("/aliengo_gazebo/FR_hip_controller/state", 2, &FSM::FR_hip_state_callback, this);
-    this->sub_joint_msg[4] = this->nh_.subscribe("/aliengo_gazebo/FR_thigh_controller/state", 2, &FSM::FR_thigh_state_callback, this);
-    this->sub_joint_msg[5] = this->nh_.subscribe("/aliengo_gazebo/FR_calf_controller/state", 2, &FSM::FR_calf_state_callback, this);
-    this->sub_joint_msg[6] = this->nh_.subscribe("/aliengo_gazebo/RL_hip_controller/state", 2, &FSM::RL_hip_state_callback, this);
-    this->sub_joint_msg[7] = this->nh_.subscribe("/aliengo_gazebo/RL_thigh_controller/state", 2, &FSM::RL_thigh_state_callback, this);
-    this->sub_joint_msg[8] = this->nh_.subscribe("/aliengo_gazebo/RL_calf_controller/state", 2, &FSM::RL_calf_state_callback, this);
-    this->sub_joint_msg[9] = this->nh_.subscribe("/aliengo_gazebo/RR_hip_controller/state", 2, &FSM::RR_hip_state_callback, this);
-    this->sub_joint_msg[10] = this->nh_.subscribe("/aliengo_gazebo/RR_thigh_controller/state", 2, &FSM::RR_thigh_state_callback, this);
-    this->sub_joint_msg[11] = this->nh_.subscribe("/aliengo_gazebo/RR_calf_controller/state", 2, &FSM::RR_calf_state_callback, this);
+    this->sub_joint_msg[0] = this->nh_.subscribe("/a1_gazebo/FL_hip_controller/state", 2, &FSM::FL_hip_state_callback, this);
+    this->sub_joint_msg[1] = this->nh_.subscribe("/a1_gazebo/FL_thigh_controller/state", 2, &FSM::FL_thigh_state_callback, this);
+    this->sub_joint_msg[2] = this->nh_.subscribe("/a1_gazebo/FL_calf_controller/state", 2, &FSM::FL_calf_state_callback, this);
+    this->sub_joint_msg[3] = this->nh_.subscribe("/a1_gazebo/FR_hip_controller/state", 2, &FSM::FR_hip_state_callback, this);
+    this->sub_joint_msg[4] = this->nh_.subscribe("/a1_gazebo/FR_thigh_controller/state", 2, &FSM::FR_thigh_state_callback, this);
+    this->sub_joint_msg[5] = this->nh_.subscribe("/a1_gazebo/FR_calf_controller/state", 2, &FSM::FR_calf_state_callback, this);
+    this->sub_joint_msg[6] = this->nh_.subscribe("/a1_gazebo/RL_hip_controller/state", 2, &FSM::RL_hip_state_callback, this);
+    this->sub_joint_msg[7] = this->nh_.subscribe("/a1_gazebo/RL_thigh_controller/state", 2, &FSM::RL_thigh_state_callback, this);
+    this->sub_joint_msg[8] = this->nh_.subscribe("/a1_gazebo/RL_calf_controller/state", 2, &FSM::RL_calf_state_callback, this);
+    this->sub_joint_msg[9] = this->nh_.subscribe("/a1_gazebo/RR_hip_controller/state", 2, &FSM::RR_hip_state_callback, this);
+    this->sub_joint_msg[10] = this->nh_.subscribe("/a1_gazebo/RR_thigh_controller/state", 2, &FSM::RR_thigh_state_callback, this);
+    this->sub_joint_msg[11] = this->nh_.subscribe("/a1_gazebo/RR_calf_controller/state", 2, &FSM::RR_calf_state_callback, this);
 
 
     this->state_interior_.Reset();
@@ -124,6 +137,9 @@ void FSM::loop(const ros::TimerEvent &) {
     /*! running the schedule table */
     if(this->Workers[this->flow]->is_finished()){
         if(this->state_interior_.gait_type == quad::STAND){
+            /*! Update Stand Interior info */
+            this->state_interior_.cur_position << 0, 0, 0.345;
+            this->state_interior_.cur_vel << 0, 0, 0;
             this->model_LegController->FirstUpdateData(&this->state_interior_);
         }
         this->flow++;
@@ -142,6 +158,10 @@ void FSM::loop(const ros::TimerEvent &) {
             /*! Update Leg Control Data and Command */
             Update_LegController();
             Update_StateEstimate();
+            /*! Convex MPC -> Calculate contact force */
+            this->state_interior_.foot_contact_force = this->mpc_solver.Calculate_contact_force(this->state_interior_);
+            //std::cout << this->state_interior_.foot_contact_force << std::endl;
+            SendCommand();
         }
     }
 }
@@ -206,6 +226,13 @@ void FSM::Update_LegController(){
         this->state_interior_.foot_qdDes.block<3, 1>(0, foot) =
                 this->model_LegController->leg_command_[foot].qdDes;
     }
+    /*! Update feedback */
+    for (int foot = 0; foot < 4; foot++) {
+        for (int joint = 0; joint < 3; joint++) {
+            this->model_LegController->leg_data_[foot].q(joint) = this->state_interior_.joint_position(foot*3+joint);
+            this->model_LegController->leg_data_[foot].qd(joint) = this->state_interior_.joint_velocity(foot*3+joint);
+        }
+    }
     this->model_LegController->UpdateData();
     /*! Update foot */
     for (int foot = 0; foot < 4; foot++) {
@@ -217,10 +244,11 @@ void FSM::Update_LegController(){
                 this->model_LegController->leg_data_[foot].q;
         this->state_interior_.foot_qd.block<3, 1>(0, foot) =
                 this->model_LegController->leg_data_[foot].qd;
-        this->state_interior_.foot_jacobian.block<3, 3>(0, foot) =
+        this->state_interior_.foot_jacobian.block<3, 3>(foot*3, foot*3) =
                 this->model_LegController->leg_data_[foot].J;
-        this->state_interior_.foot_jacobian_inv.block<3, 3>(0, foot) =
+        this->state_interior_.foot_jacobian_inv.block<3, 3>(foot*3, foot*3) =
                 this->model_LegController->leg_data_[foot].J_inv;
+
 
         /*! add robot state to get foot position in world frame*/
         this->state_interior_.foot_p_abs.block<3, 1>(0, foot) =
@@ -229,10 +257,16 @@ void FSM::Update_LegController(){
         this->state_interior_.foot_p.block<3, 1>(0, foot) =
                 this->state_interior_.foot_p_abs.block<3, 1>(0, foot)
                         + this->state_interior_.cur_position;
+
+        /*! Update Params that control swing Legs */
+
+        this->state_interior_.foot_forces_swing.block<3, 1>(0, foot) =
+                (this->state_interior_.foot_pDes.block<3, 1>(0, foot)
+                 -this->state_interior_.foot_p_robot.block<3, 1>(0, foot)).cwiseProduct(this->state_interior_.kp_foot.block<3, 1>(0, foot))
+                +(this->state_interior_.foot_vDes.block<3, 1>(0, foot)
+                 -this->state_interior_.foot_v_robot.block<3, 1>(0, foot)).cwiseProduct(this->state_interior_.kd_foot.block<3, 1>(0, foot));
+
     }
-    /*! Publish gazebo data */
-    this->model_LegController->SetData(&this->state_info_.angle_gazebo_data);
-    //this->angle_gazebo_pub_.publish(this->state_info_.angle_gazebo_data);
 
 }
 
@@ -260,10 +294,78 @@ void FSM::Update_StateEstimate() {
     this->state_info_.b_twist.linear.y = this->model_StateEstimate->getVelocity_Body().y();
     this->state_info_.b_twist.linear.z = this->model_StateEstimate->getVelocity_Body().z();
 
+
     /*! Publish State Information */
     this->position_pub_.publish(this->state_info_.cur_state);
     this->velocity_pub_.publish(this->state_info_.w_twist.linear);
     this->euler_pub_.publish(this->state_info_.rpy_angle);
+}
+
+void FSM::SendCommand(){
+    /*! Calculate torques */
+    this->state_interior_.joint_torques = this->mpc_solver.Calculate_joint_torques(this->state_interior_);
+
+    // send control cmd to robot via ros topic
+    unitree_legged_msgs::LowCmd low_cmd;
+    for (int i = 0; i < 4; i++) {
+        //if(this->state_interior_.contacts[i] == 0){
+        if(1){
+                low_cmd.motorCmd[3*i].mode = 0x0A;
+                low_cmd.motorCmd[3*i].q = 0;
+                low_cmd.motorCmd[3*i].dq = 0;
+                low_cmd.motorCmd[3*i].Kp = 70;
+                low_cmd.motorCmd[3*i].Kd = 3;
+                low_cmd.motorCmd[3*i].tau = 0;
+
+                low_cmd.motorCmd[3*i+1].mode = 0x0A;
+                low_cmd.motorCmd[3*i+1].q = this->state_interior_.foot_qDes(1, i);
+                low_cmd.motorCmd[3*i+1].dq = 0;
+                low_cmd.motorCmd[3*i+1].Kp = 180;
+                low_cmd.motorCmd[3*i+1].Kd = 8;
+                low_cmd.motorCmd[3*i+1].tau = 0;
+
+                low_cmd.motorCmd[3*i+2].mode = 0x0A;
+                low_cmd.motorCmd[3*i+2].q = this->state_interior_.foot_qDes(2, i);
+                low_cmd.motorCmd[3*i+2].dq = 0;
+                low_cmd.motorCmd[3*i+2].Kp = 300;
+                low_cmd.motorCmd[3*i+2].Kd = 15;
+                low_cmd.motorCmd[3*i+2].tau = 0;
+
+        }
+        else {
+            low_cmd.motorCmd[3 * i].mode = 0x0A;
+            low_cmd.motorCmd[3 * i].q = 0;
+            low_cmd.motorCmd[3 * i].dq = 0;
+            low_cmd.motorCmd[3 * i].Kp = 70;
+            low_cmd.motorCmd[3 * i].Kd = 3;
+            low_cmd.motorCmd[3 * i].tau = 0;
+
+            low_cmd.motorCmd[3 * i + 1].mode = 0x0A;
+            low_cmd.motorCmd[3 * i + 1].q = 0;
+            low_cmd.motorCmd[3 * i + 1].dq = 0;
+            low_cmd.motorCmd[3 * i + 1].Kp = 0;
+            low_cmd.motorCmd[3 * i + 1].Kd = 0;
+            low_cmd.motorCmd[3 * i + 1].tau = this->state_interior_.joint_torques(3*i+1, 0);
+
+            low_cmd.motorCmd[3 * i + 2].mode = 0x0A;
+            low_cmd.motorCmd[3 * i + 2].q = 0;
+            low_cmd.motorCmd[3 * i + 2].dq = 0;
+            low_cmd.motorCmd[3 * i + 2].Kp = 0;
+            low_cmd.motorCmd[3 * i + 2].Kd = 0;
+            low_cmd.motorCmd[3 * i + 2].tau = this->state_interior_.joint_torques(3*i+2, 0);
+        }
+//        low_cmd.motorCmd[i].tau = this->state_interior_.joint_torques(i, 0);
+    }
+    for (int i = 0; i < 6; i++) {
+        pub_joint_cmd[i].publish(low_cmd.motorCmd[i]);
+    }
+    pub_joint_cmd[6].publish(low_cmd.motorCmd[9]);
+    pub_joint_cmd[7].publish(low_cmd.motorCmd[10]);
+    pub_joint_cmd[8].publish(low_cmd.motorCmd[11]);
+    pub_joint_cmd[9].publish(low_cmd.motorCmd[6]);
+    pub_joint_cmd[10].publish(low_cmd.motorCmd[7]);
+    pub_joint_cmd[11].publish(low_cmd.motorCmd[8]);
+
 }
 
 void FSM::MotorCallback(const std_msgs::Float64MultiArray &msg) {
@@ -294,6 +396,8 @@ void FSM::IMUCallback(const sensor_msgs::Imu &msg) {
     this->state_interior_.b_angle_vel.x() = msg.angular_velocity.x;
     this->state_interior_.b_angle_vel.y() = msg.angular_velocity.y;
     this->state_interior_.b_angle_vel.z() = msg.angular_velocity.z;
+    this->state_interior_.w_angle_vel = this->state_interior_.rotate_matrix * this->state_interior_.b_angle_vel;
+
     this->state_interior_.b_acc.x() = msg.linear_acceleration.x;
     this->state_interior_.b_acc.y() = msg.linear_acceleration.y;
     this->state_interior_.b_acc.z() = msg.linear_acceleration.z;
@@ -303,10 +407,12 @@ void FSM::IMUCallback(const sensor_msgs::Imu &msg) {
 
     this->state_interior_.quaternion = temp_quat;
     this->state_interior_.rotate_matrix = this->state_interior_.quaternion.toRotationMatrix();
+
 }
 
 void FSM::JoyCallback(const sensor_msgs::Joy &msg) {
     this->state_interior_.command_vel.x() = msg.axes[1]*0.5;
+    this->state_interior_.command_rpy << 0,0,0;
 }
 
 // FL

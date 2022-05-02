@@ -1,8 +1,0 @@
-prefix=/home/demphi/ros/quad_ws/install
-
-Name: main_controller
-Description: Description of main_controller
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: unitree_legged_msgs

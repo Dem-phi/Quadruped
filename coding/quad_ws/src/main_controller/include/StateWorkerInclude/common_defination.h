@@ -57,7 +57,7 @@ class STATE_INTERIOR{
         }
 
         void Reset(){
-            robot_mass = 15.0;
+            robot_mass = 13.0;
             inertia_tensor << 0.0158533, 0.0, 0.0,
                     0.0, 0.0377999, 0.0,
                     0.0, 0.0, 0.0456542;
@@ -69,19 +69,21 @@ class STATE_INTERIOR{
 
             command_vel.setZero();
             command_angle_vel.setZero();
+            command_rpy.setZero();
+
 
             cur_position.setZero();
             cur_vel.setZero();
             b_angle_vel.setZero();
             w_angle_vel.setZero();
             cur_rpy.setZero();
-            last_rpy.setZero();
             b_acc.setZero();
 
             quaternion.setIdentity();
             rotate_matrix.setZero();
 
             foot_contact_force.setZero();
+            foot_forces_swing.setZero();
             foot_p.setZero();
             foot_p_bias.setZero();
             foot_p_robot.setZero();
@@ -99,7 +101,7 @@ class STATE_INTERIOR{
             foot_qdDes.setZero();
 
             for (int i = 0; i < NUM_LEG; i++) {
-                contacts[i] = false;
+                contacts[i] = 0;
                 plan_contacts[i] = false;
                 early_contacts[i] = false;
                 estimate_contacts[i] = false;
@@ -127,6 +129,34 @@ class STATE_INTERIOR{
             joint_velocity.setZero();
             joint_torques.setZero();
 
+            /*! Init PD controller Parameters, Why ?*/
+            double kp_foot_x = 150.0;
+            double kp_foot_y = 150.0;
+            double kp_foot_z = 200.0;
+            double kd_foot_x = 0.0;
+            double kd_foot_y = 0.0;
+            double kd_foot_z = 0.0;
+            kp_foot <<
+                    kp_foot_x, kp_foot_x, kp_foot_x, kp_foot_x,
+                    kp_foot_y, kp_foot_y, kp_foot_y, kp_foot_y,
+                    kp_foot_z, kp_foot_z, kp_foot_z, kp_foot_z;
+            kd_foot <<
+                    kd_foot_x, kd_foot_x, kd_foot_x, kd_foot_x,
+                    kd_foot_y, kd_foot_y, kd_foot_y, kd_foot_y,
+                    kd_foot_z, kd_foot_z, kd_foot_z, kd_foot_z;
+            km_foot = Eigen::Vector3d(0.1, 0.1, 0.04);
+
+            kp_linear = Eigen::Vector3d(120.0, 120.0, 500.0);
+            kd_linear = Eigen::Vector3d(70.0, 70.0, 120.0);
+            kp_angular = Eigen::Vector3d(250.0, 35.0, 1.0);
+            kd_angular = Eigen::Vector3d(1.5, 1.5, 30.0);
+/*            kp_linear = Eigen::Vector3d(1.0, 1.0, 1.0);
+            kd_linear = Eigen::Vector3d(0.0, 0.0, 0.0);
+            kp_angular = Eigen::Vector3d(0.0, 0.0, 0.0);
+            kd_angular = Eigen::Vector3d(0.0, 0.0, 0.0);*/
+
+            torques_gravity << 0.80, 0, 0, -0.80, 0, 0, 0.80, 0, 0, -0.80, 0, 0;
+
         }
 
         void InitParams(){
@@ -141,7 +171,7 @@ class STATE_INTERIOR{
                 }else{
                     foot_p_bias.block<3, 1>(0, foot).y() = -Y_OFFSET;
                 }
-                foot_p_bias.block<3, 1>(0, foot).z() = -0.69282;
+                foot_p_bias.block<3, 1>(0, foot).z() = -0.345;
             }
         }
 
@@ -160,6 +190,7 @@ class STATE_INTERIOR{
         /*! Command from Joy */
         Eigen::Vector3d command_vel;
         Eigen::Vector3d command_angle_vel;
+        Eigen::Vector3d command_rpy;
 
         /*! Current State */
         Eigen::Vector3d cur_position;
@@ -167,7 +198,7 @@ class STATE_INTERIOR{
         Eigen::Vector3d b_angle_vel; // in robot frame
         Eigen::Vector3d w_angle_vel; // in world frame
         Eigen::Vector3d cur_rpy;
-        Eigen::Vector3d last_rpy;
+
         Eigen::Vector3d b_acc;       // in robot frame
 
         /*! Kinematic Parameters */
@@ -175,6 +206,7 @@ class STATE_INTERIOR{
         Eigen::Matrix3d rotate_matrix;
 
         /*! Leg Controller Parameters */
+        Eigen::Matrix<double, 3, NUM_LEG> foot_forces_swing;
         Eigen::Matrix<double, 3, NUM_LEG> foot_contact_force;
         // Data
         Eigen::Matrix<double, 3, NUM_LEG> foot_p;   // in world frame
@@ -196,7 +228,7 @@ class STATE_INTERIOR{
 
 
         /*! Gait Phase Parameters */
-        bool contacts[NUM_LEG]; // True, if foot in contact
+        int contacts[NUM_LEG]; // True, if foot in contact
         bool plan_contacts[NUM_LEG];
         bool early_contacts[NUM_LEG];   // True, if foot hit objects during swing
         Eigen::Vector4d phase_variable;
@@ -217,7 +249,24 @@ class STATE_INTERIOR{
         Eigen::Matrix<double, NUM_DOF, 1>joint_position;
         Eigen::Matrix<double, NUM_DOF, 1>joint_velocity;
         Eigen::Matrix<double, NUM_DOF, 1>joint_torques;
+        Eigen::Matrix<double, NUM_DOF, 1>torques_gravity;
 
+        // Still have problems in some parameters
+        double kp_lin_x;
+        double kd_lin_x;
+        double kf_lin_x;
+        double kp_lin_y;
+        double kd_lin_y;
+        double kf_lin_y;
+
+        Eigen::Matrix<double, 3, NUM_LEG> kp_foot;
+        Eigen::Matrix<double, 3, NUM_LEG> kd_foot;
+        Eigen::Matrix<double, 3, 1> km_foot;
+
+        Eigen::Vector3d kp_linear;
+        Eigen::Vector3d kd_linear;
+        Eigen::Vector3d kp_angular;
+        Eigen::Vector3d kd_angular;
 
     };
 

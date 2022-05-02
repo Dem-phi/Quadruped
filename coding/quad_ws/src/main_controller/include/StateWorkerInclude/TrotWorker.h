@@ -9,6 +9,7 @@ class TrotWorker:public StateWorker{
 private:
     const double foot2ground_ = 0.1;
     int count_;
+    int mpc_delay;
 
 public:
     ros::NodeHandle nh_;
@@ -79,9 +80,10 @@ void TrotWorker::run(STATE_INTERIOR *cur_state) {
         }
         cur_state->foot_pDes.block<3, 1>(0, foot) = this->model_FST[foot]->getPosition();
         cur_state->foot_vDes.block<3, 1>(0, foot) = this->model_FST[foot]->getVelocity();
-        cur_state->contacts[foot] = (this->model_GS->gait_data_.contact_state_schedule_(foot) == 1);
+        cur_state->contacts[foot] = this->model_GS->gait_data_.contact_state_schedule_(foot);
 
     }
+    //std::cout << cur_state->contacts[0]  << cur_state->contacts[1] << cur_state->contacts[2] << cur_state->contacts[3]<< std::endl;
 }
 
 bool TrotWorker::is_finished() {

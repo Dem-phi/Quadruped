@@ -13,7 +13,7 @@ int main(int argc, char** argv){
     Finite_State_Machine.build_ScheduleTable(
             quad::STAND,
             //quad::WALK,
-           quad::TROT,
+            quad::TROT,
 //           quad::PACE,
 //           quad::GALLOP,
             quad::END

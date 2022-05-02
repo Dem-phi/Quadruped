@@ -30,9 +30,16 @@ public:
     const double imu_process_noise_position = 0.02;
     const double imu_process_noise_velocity = 0.02;
     const double foot_process_noise_position = 0.002;
-    const double foot_sensor_noise_position = 0.001;
+    const double foot_sensor_noise_position = 0.01;
     const double foot_sensor_noise_velocity = 0.1;
     const double foot_height_sensor_noise = 0.001;
+
+/*    const double imu_process_noise_position = 0;
+    const double imu_process_noise_velocity = 0;
+    const double foot_process_noise_position = 0;
+    const double foot_sensor_noise_position = 0;
+    const double foot_sensor_noise_velocity = 0;
+    const double foot_height_sensor_noise = 0;*/
 
     StateEstimateData state_data_;
 
@@ -134,18 +141,7 @@ public:
         for (int i = 0; i < 4; i++) {
             int i1 = 3 * i;
 /*            Vec3 ph;                                        //计算相对于CoM的髋部位置，即机器人坐标系中腿的臀部位置
-            // Set X axis offset
-            if(i == 0 || i == 1){
-                ph.x() = quad::X_OFFSET;
-            }else{
-                ph.x() = -quad::X_OFFSET;
-            }
-            // Set Y axis offset
-            if(i == 0 || i == 3){
-                ph.y() = quad::Y_OFFSET;
-            }else{
-                ph.y() = -quad::Y_OFFSET;
-            }*/
+*/
             Vec3 p_rel = _foot_p.block<3, 1>(0, i);                  //计算世界坐标系下机器人真正的位置= 机器人坐标系中腿的臀部位置+腿的位置
             Vec3 dp_rel = _foot_v.block<3, 1>(0, i);                      //计算世界坐标系下机器人真正的速度= 状态估计器中每条的速度
             Vec3 p_f = Rbod * p_rel;                        //计算身体坐标系下机器人真正的位置= 身体坐标系下的旋转矩阵*世界坐标系下机器人真正的位置
@@ -157,7 +153,7 @@ public:
             rindex2 = 12 + i1;
             rindex3 = 24 + i;
 
-            double trust = 1;                                                                     //定义触地标志位变量trust
+            double trust = 1;                                     //定义触地标志位变量trust
             double phase = fmin(_contact_phase(i), 1);         //计算接触相序
 
             //T trust_window = T(0.25);
