@@ -7,6 +7,7 @@
 
 #include "FootSwingTrajectory.h"
 #include "MathTools/KinematicModel.h"
+#include "MathTools/LegKinematics.h"
 #include "common_parameter.h"
 
 /*!
@@ -58,15 +59,41 @@ public:
     LegControllerData leg_data_[4];
 
     KinematicModel* model_kinematic = new KinematicModel();
+    LegKinematics* model_LegKinematic = new LegKinematics();
+
+    std::vector<Eigen::VectorXd> rho_fix_list;
+    std::vector<Eigen::VectorXd> rho_opt_list;
 
     LegController(){
         for (int i = 0; i < 4; i++) {
             this->leg_command_[i].zero();
             this->leg_data_[i].zero();
         }
+        double leg_offset_x[4] = {};
+        double leg_offset_y[4] = {};
+
+        //0-FL  1-FR  2-RR  3-RL
+        leg_offset_x[0] = 0.1805;
+        leg_offset_x[1] = 0.1805;
+        leg_offset_x[2] = -0.1805;
+        leg_offset_x[3] = -0.1805;
+        leg_offset_y[0] = 0.047;
+        leg_offset_y[1] = -0.047;
+        leg_offset_y[2] = -0.047;
+        leg_offset_y[3] = 0.047;
+
+        for (int i = 0; i < quad::NUM_LEG; i++) {
+            Eigen::VectorXd rho_fix(5);
+            rho_fix << leg_offset_x[i], leg_offset_y[i], 0, quad::HIP_LENGTH, quad::KNEE_LENGTH;
+            Eigen::VectorXd rho_opt(3);
+            rho_opt << 0.0, 0.0, 0.0;
+            rho_fix_list.push_back(rho_fix);
+            rho_opt_list.push_back(rho_opt);
+        }
     }
     ~LegController(){
         delete this->model_kinematic;
+        delete this->model_LegKinematic;
     }
 
     void FirstUpdateData(STATE_INTERIOR *cur_state){
@@ -75,31 +102,29 @@ public:
             this->leg_data_[foot].q(0) = 0.0;
             this->leg_data_[foot].q(1) = 30/quad::Rad2Deg;
             this->leg_data_[foot].q(2) = -60/quad::Rad2Deg;
-            this->leg_data_[foot].p = this->model_kinematic->ForwardKinematic(foot, this->leg_data_[foot].q);
-            ComputeJacobian(this->leg_data_[foot].q, &this->leg_data_[foot].J_temp, foot);
-            this->leg_data_[foot].J_temp_inv = this->leg_data_[foot].J_temp.inverse();
-            this->leg_data_[foot].J <<  0, this->leg_data_[foot].J_temp(0,0), this->leg_data_[foot].J_temp(0,1),
-                    0, 0, 0,
-                    0, this->leg_data_[foot].J_temp(1,0), this->leg_data_[foot].J_temp(1, 1);
-            this->leg_data_[foot].J_inv <<  0, 0, 0,
-                    this->leg_data_[foot].J_temp_inv(0,0), 0, this->leg_data_[foot].J_temp_inv(0,1),
-                    this->leg_data_[foot].J_temp_inv(1,0), 0, this->leg_data_[foot].J_temp_inv(1,1);
+            this->leg_data_[foot].p = this->model_LegKinematic->fk(
+                    this->leg_data_[foot].q, rho_opt_list[foot], rho_fix_list[foot]);
+            this->leg_data_[foot].J = this->model_LegKinematic->jac(
+                    this->leg_data_[foot].q, rho_opt_list[foot], rho_fix_list[foot]);
+            this->leg_data_[foot].J_inv = this->leg_data_[foot].J.inverse();
+            this->leg_data_[foot].v = this->leg_data_[foot].J * this->leg_data_[foot].qd;
 
+            //this->leg_data_[foot].p = this->model_kinematic->ForwardKinematic(foot, this->leg_data_[foot].q);
+            //ComputeJacobian(this->leg_data_[foot].q, &this->leg_data_[foot].J_temp, &this->leg_data_[foot].J, foot);
             //update velocity by Jacobian
-            Vec2 temp_v;
-            temp_v.x() = this->leg_data_[foot].qd.y();
-            temp_v.y() = this->leg_data_[foot].qd.z();
-            Vec2 temp_ = this->leg_data_[foot].J_temp * temp_v;
-            this->leg_data_[foot].v << temp_.x(), 0.0, temp_.y();
+//            Vec2 temp_v;
+//            temp_v.x() = this->leg_data_[foot].qd.y();
+//            temp_v.y() = this->leg_data_[foot].qd.z();
+//            Vec2 temp_ = this->leg_data_[foot].J_temp * temp_v;
+//            this->leg_data_[foot].v << temp_.x(), 0.0, temp_.y();
+
+
+
             /*! Update to state interior */
             cur_state->foot_p_robot.block<3, 1>(0, foot) = this->leg_data_[foot].p;
             cur_state->foot_v_robot.block<3, 1>(0, foot) << 0, 0, 0;
             cur_state->foot_q.block<3, 1>(0, foot) = this->leg_data_[foot].q;
             cur_state->foot_qd.block<3, 1>(0, foot) = this->leg_data_[foot].qd;
-            cur_state->foot_p_abs.block<3, 1>(0, foot) =
-                    cur_state->rotate_matrix * cur_state->foot_p_robot.block<3, 1>(0, foot);
-            cur_state->foot_p.block<3, 1>(0, foot) =
-                    cur_state->foot_p_abs.block<3, 1>(0, foot) + cur_state->cur_position;
         }
 
 
@@ -107,22 +132,22 @@ public:
 
     void UpdateData(){
         for (int foot = 0; foot < 4; foot++) {
-            this->leg_data_[foot].p = this->model_kinematic->ForwardKinematic(foot, this->leg_data_[foot].q);
-            ComputeJacobian(this->leg_data_[foot].q, &this->leg_data_[foot].J_temp, foot);
-            this->leg_data_[foot].J_temp_inv = this->leg_data_[foot].J_temp.inverse();
-            this->leg_data_[foot].J <<  0, this->leg_data_[foot].J_temp(0,0), this->leg_data_[foot].J_temp(0,1),
-                    0, 0, 0,
-                    0, this->leg_data_[foot].J_temp(1,0), this->leg_data_[foot].J_temp(1, 1);
-            this->leg_data_[foot].J_inv <<  0, 0, 0,
-                    this->leg_data_[foot].J_temp_inv(0,0), 0, this->leg_data_[foot].J_temp_inv(0,1),
-                    this->leg_data_[foot].J_temp_inv(1,0), 0, this->leg_data_[foot].J_temp_inv(1,1);
-            //this->leg_data_[foot].J_inv = this->leg_data_[foot].J.inverse();
+            this->leg_data_[foot].p = this->model_LegKinematic->fk(
+                    this->leg_data_[foot].q, rho_opt_list[foot], rho_fix_list[foot]);
+            this->leg_data_[foot].J = this->model_LegKinematic->jac(
+                    this->leg_data_[foot].q, rho_opt_list[foot], rho_fix_list[foot]);
+            this->leg_data_[foot].J_inv = this->leg_data_[foot].J.inverse();
+            this->leg_data_[foot].v = this->leg_data_[foot].J * this->leg_data_[foot].qd;
+
+/*            this->leg_data_[foot].p = this->model_kinematic->ForwardKinematic(foot, this->leg_data_[foot].q);
+            ComputeJacobian(this->leg_data_[foot].q, &this->leg_data_[foot].J_temp, &this->leg_data_[foot].J, foot);
+            this->leg_data_[foot].J_inv = this->leg_data_[foot].J.inverse();
             //update velocity by Jacobian
             Vec2 temp_v;
             temp_v.x() = this->leg_data_[foot].qd.y();
             temp_v.y() = this->leg_data_[foot].qd.z();
             Vec2 temp_ = this->leg_data_[foot].J_temp * temp_v;
-            this->leg_data_[foot].v << temp_.x(), 0.0, temp_.y();
+            this->leg_data_[foot].v << temp_.x(), 0.0, temp_.y();*/
         }
     }
 
@@ -133,12 +158,13 @@ public:
             temp_v.x() = this->leg_command_[foot].vDes.x();
             temp_v.y() = this->leg_command_[foot].vDes.z();
             Vec2 temp_ = this->leg_data_[foot].J_temp.inverse()*temp_v;
+            this->leg_command_[foot].qdDes.x() = 0.0;
             this->leg_command_[foot].qdDes.y() = temp_.x();
             this->leg_command_[foot].qdDes.z() = temp_.y();
         }
     }
 
-    void ComputeJacobian(Vec3 &q, Mat22* J, int leg){
+    void ComputeJacobian(Vec3 &q, Mat22* J, Mat33* J_3DoF, int leg){
         double l1 = quad::HIP_LENGTH;
         double l2 = quad::KNEE_LENGTH;
 
@@ -149,18 +175,21 @@ public:
         double s12 = s1*c2+c1*s2;
         double c12 = c1*c2-s1*s2;
 
-        J->operator()(0,0) = l1*c1+l2*c12;
-        J->operator()(0, 1) = l2*c12;
+        J->operator()(0,0) = -(l1*c1+l2*c12);
+        J->operator()(0, 1) = -(l2*c12);
         J->operator()(1,0) = l1*s1+l2* s12;
         J->operator()(1,1) = l2*s12;
-    }
 
-    void SetData(std_msgs::Float64MultiArray* angle_gazebo_data_){
-        for (int foot = 0; foot < 4; foot++) {
-            angle_gazebo_data_->data[3*foot] = this->leg_command_[foot].qDes.x()*quad::Rad2Deg;
-            angle_gazebo_data_->data[3*foot+1] = this->leg_command_[foot].qDes.y()*quad::Rad2Deg;
-            angle_gazebo_data_->data[3*foot+2] = this->leg_command_[foot].qDes.z()*quad::Rad2Deg;
-        }
+        J_3DoF->operator()(0, 0) = 0;
+        J_3DoF->operator()(0, 1) = -(l1*c1+l2*c12);
+        J_3DoF->operator()(0, 2) = -(l2*c12);
+        J_3DoF->operator()(1, 0) = l2*c12+l1*c1;
+        J_3DoF->operator()(1, 1) = 0;
+        J_3DoF->operator()(1, 2) = 0;
+        J_3DoF->operator()(2, 0) = 0;
+        J_3DoF->operator()(2, 1) = l1*s1+l2* s12;
+        J_3DoF->operator()(2, 2) = l2*s12;
+
     }
 
 };

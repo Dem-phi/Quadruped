@@ -11,6 +11,7 @@
 #include "GaitTable.h"
 #include "GaitTransition.h"
 #include "KinematicModel.h"
+#include "MathTools/LegKinematics.h"
 #include "Controllers/GaitScheduler.h"
 #include "Controllers/FootSwingTrajectory.h"
 #include "Controllers/LegController.h"

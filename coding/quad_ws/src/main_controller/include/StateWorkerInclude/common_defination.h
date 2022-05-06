@@ -57,6 +57,24 @@ class STATE_INTERIOR{
         }
 
         void Reset(){
+            /*! For test parameters */
+            movement_mode = 1;  // 0: standstill, 1: start to locomote
+            counter_per_gait = 120 * 2;
+            counter_per_swing = 120;
+            counter = 0;
+            gait_counter.setZero();
+            gait_counter_speed.setZero();
+            foot_pos_target_world.setZero();
+            foot_pos_target_abs.setZero();
+            foot_pos_target_rel.setZero();
+            foot_pos_start.setZero();
+            foot_pos_rel_last_time.setZero();
+            foot_pos_target_last_time.setZero();
+            foot_pos_cur.setZero();
+
+
+
+
             robot_mass = 13.0;
             inertia_tensor << 0.0158533, 0.0, 0.0,
                     0.0, 0.0377999, 0.0,
@@ -82,6 +100,7 @@ class STATE_INTERIOR{
             quaternion.setIdentity();
             rotate_matrix.setZero();
 
+            foot_force.setZero();
             foot_contact_force.setZero();
             foot_forces_swing.setZero();
             foot_p.setZero();
@@ -110,15 +129,15 @@ class STATE_INTERIOR{
 
             q_weights.resize(MPC_STATE_DIM);
             r_weights.resize(12);
-            q_weights << 80.0, 80.0, 1.0,
-                    0.0, 0.0, 270.0,
-                    1.0, 1.0, 20.0,
-                    20.0, 20.0, 20.0,
+            q_weights << 20.0, 10.0, 1.0,
+                    0.0, 0.0, 420.0,
+                    0.05, 0.05, 0.05,
+                    30.0, 30.0, 10.0,
                     0.0;
-            r_weights << 1e-5, 1e-5, 1e-6,
-                    1e-5, 1e-5, 1e-6,
-                    1e-5, 1e-5, 1e-6,
-                    1e-5, 1e-5, 1e-6;
+            r_weights << 1e-7, 1e-7, 1e-7,
+                    1e-7, 1e-7, 1e-7,
+                    1e-7, 1e-7, 1e-7,
+                    1e-7, 1e-7, 1e-7;
             mpc_states.setZero();
             mpc_states_list.setZero();
 
@@ -130,12 +149,12 @@ class STATE_INTERIOR{
             joint_torques.setZero();
 
             /*! Init PD controller Parameters, Why ?*/
-            double kp_foot_x = 150.0;
-            double kp_foot_y = 150.0;
-            double kp_foot_z = 200.0;
-            double kd_foot_x = 0.0;
-            double kd_foot_y = 0.0;
-            double kd_foot_z = 0.0;
+            double kp_foot_x = 200.0;
+            double kp_foot_y = 200.0;
+            double kp_foot_z = 150.0;
+            double kd_foot_x = 10.0;
+            double kd_foot_y = 10.0;
+            double kd_foot_z = 5.0;
             kp_foot <<
                     kp_foot_x, kp_foot_x, kp_foot_x, kp_foot_x,
                     kp_foot_y, kp_foot_y, kp_foot_y, kp_foot_y,
@@ -144,16 +163,12 @@ class STATE_INTERIOR{
                     kd_foot_x, kd_foot_x, kd_foot_x, kd_foot_x,
                     kd_foot_y, kd_foot_y, kd_foot_y, kd_foot_y,
                     kd_foot_z, kd_foot_z, kd_foot_z, kd_foot_z;
-            km_foot = Eigen::Vector3d(0.1, 0.1, 0.04);
+            km_foot = Eigen::Vector3d(0.1, 0.1, 0.1);
 
             kp_linear = Eigen::Vector3d(120.0, 120.0, 500.0);
             kd_linear = Eigen::Vector3d(70.0, 70.0, 120.0);
             kp_angular = Eigen::Vector3d(250.0, 35.0, 1.0);
             kd_angular = Eigen::Vector3d(1.5, 1.5, 30.0);
-/*            kp_linear = Eigen::Vector3d(1.0, 1.0, 1.0);
-            kd_linear = Eigen::Vector3d(0.0, 0.0, 0.0);
-            kp_angular = Eigen::Vector3d(0.0, 0.0, 0.0);
-            kd_angular = Eigen::Vector3d(0.0, 0.0, 0.0);*/
 
             torques_gravity << 0.80, 0, 0, -0.80, 0, 0, 0.80, 0, 0, -0.80, 0, 0;
 
@@ -164,9 +179,9 @@ class STATE_INTERIOR{
                 if(foot == 0 || foot == 1){
                     foot_p_bias.block<3, 1>(0, foot).x() = X_OFFSET;
                 }else{
-                    foot_p_bias.block<3, 1>(0, foot).x() = -X_OFFSET;
+                    foot_p_bias.block<3, 1>(0, foot).x() = -X_OFFSET+0.08;
                 }
-                if(foot == 0 || foot == 2){
+                if(foot == 0 || foot == 3){
                     foot_p_bias.block<3, 1>(0, foot).y() = Y_OFFSET;
                 }else{
                     foot_p_bias.block<3, 1>(0, foot).y() = -Y_OFFSET;
@@ -175,8 +190,31 @@ class STATE_INTERIOR{
             }
         }
 
+        void gait_counter_reset() {
+            if (gait_type == 1) {
+                gait_counter << 0, 120, 120, 0;
+            }
+        }
+
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-        /*! interior params */
+        /*! For test parameters */
+        int movement_mode;  // 0: standstill, 1: start to locomote
+        int counter_per_plan;
+        double counter_per_gait;
+        double counter_per_swing;
+        int counter;
+        Eigen::Vector4d gait_counter;
+        Eigen::Vector4d gait_counter_speed;
+        Eigen::Matrix<double, 3, NUM_LEG> foot_pos_target_world; // in the world frame
+        Eigen::Matrix<double, 3, NUM_LEG> foot_pos_target_abs; // in a frame which centered at the robot frame's origin but parallels to the world frame
+        Eigen::Matrix<double, 3, NUM_LEG> foot_pos_target_rel; // in the robot frame
+        Eigen::Matrix<double, 3, NUM_LEG> foot_pos_start;
+        Eigen::Matrix<double, 3, NUM_LEG> foot_pos_rel_last_time;
+        Eigen::Matrix<double, 3, NUM_LEG> foot_pos_target_last_time;
+        Eigen::Matrix<double, 3, NUM_LEG> foot_pos_cur;
+
+
+    /*! interior params */
         double robot_mass;
         Eigen::Matrix3d inertia_tensor;
 
@@ -206,6 +244,7 @@ class STATE_INTERIOR{
         Eigen::Matrix3d rotate_matrix;
 
         /*! Leg Controller Parameters */
+        Eigen::Vector4d foot_force;
         Eigen::Matrix<double, 3, NUM_LEG> foot_forces_swing;
         Eigen::Matrix<double, 3, NUM_LEG> foot_contact_force;
         // Data

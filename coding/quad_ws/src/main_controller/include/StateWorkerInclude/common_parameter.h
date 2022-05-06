@@ -35,13 +35,19 @@ namespace quad{
     const Eigen::Vector4f PACE_PHI = {0, 0.5, 0.5, 0};
     const Eigen::Vector4f GALLOP_PHI = {0, 0, 0.5, 0.5};
 
-    /*! dog constant */
-    const double X_OFFSET = 0.17;
-    const double Y_OFFSET = 0.05;
+    /*! constant */
+    const double X_OFFSET = 0.25;
+    const double Y_OFFSET = 0.15;
     const double HIP_LENGTH = 0.2;
     const double KNEE_LENGTH = 0.2;
     const int NUM_DOF = 12;
     const int NUM_LEG = 4;
+    const double FOOT_FORCE_LOW = 30.0;
+    const double FOOT_FORCE_HIGH = 80.0;
+    const double FOOT_SWING_CLEARANCE1 = 0.0f;
+    const double FOOT_SWING_CLEARANCE2 = 0.4f;
+    const double FOOT_DELTA_X_LIMIT = 0.1;
+    const double FOOT_DELTA_Y_LIMIT = 0.1;
 
     /*! MPC */
     const int PLAN_HORIZON = 10;

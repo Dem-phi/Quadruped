@@ -62,7 +62,6 @@ void TrotWorker::run(STATE_INTERIOR *cur_state) {
         else if(this->model_GS->gait_data_.phase_variable_(foot) <= 0.51 &&
                 this->model_GS->gait_data_.phase_variable_(foot) >= 0.49){
             this->model_FST[foot]->setInitialPosition(cur_state->foot_p_robot.block<3,1>(0, foot));
-            //Vec3 final_position_ = cur_state->foot_p_robot.block<3,1>(0, foot);
             Vec3 final_position_ = cur_state->foot_p_bias.block<3, 1>(0, foot)
                                  + cur_state->command_vel*this->model_GS->period_time_natural_;
             this->model_FST[foot]->setFinalPosition(final_position_);

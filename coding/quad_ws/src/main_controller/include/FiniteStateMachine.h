@@ -20,7 +20,7 @@ private:
     ros::Publisher pub_joint_cmd[12];
 
     ros::Subscriber motor_sub_, imu_sub_, joy_sub_;
-    ros::Subscriber sub_joint_msg[12];
+    ros::Subscriber sub_joint_msg[12], sub_foot_contact_msg[4];
 
 public:
     ros::NodeHandle nh_;
@@ -33,6 +33,7 @@ public:
 
     /*! Class for control */
     StateEstimate* model_StateEstimate = new StateEstimate();
+    A1BasicEKF* model_A1Estimate = new A1BasicEKF();
     LegController* model_LegController = new LegController();
     Solver mpc_solver;
 
@@ -65,7 +66,10 @@ public:
     void RR_hip_state_callback(const unitree_legged_msgs::MotorState &joint_state);
     void RR_thigh_state_callback(const unitree_legged_msgs::MotorState &joint_state);
     void RR_calf_state_callback(const unitree_legged_msgs::MotorState &joint_state);
-
+    void FL_foot_contact_callback(const geometry_msgs::WrenchStamped &force);
+    void FR_foot_contact_callback(const geometry_msgs::WrenchStamped &force);
+    void RL_foot_contact_callback(const geometry_msgs::WrenchStamped &force);
+    void RR_foot_contact_callback(const geometry_msgs::WrenchStamped &force);
 };
 
 FSM::FSM(ros::NodeHandle &nh) {
@@ -88,16 +92,16 @@ FSM::FSM(ros::NodeHandle &nh) {
     this->pub_joint_cmd[3] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/FR_hip_controller/command", 1);
     this->pub_joint_cmd[4] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/FR_thigh_controller/command", 1);
     this->pub_joint_cmd[5] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/FR_calf_controller/command", 1);
-    this->pub_joint_cmd[6] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/RL_hip_controller/command", 1);
-    this->pub_joint_cmd[7] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/RL_thigh_controller/command", 1);
-    this->pub_joint_cmd[8] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/RL_calf_controller/command", 1);
-    this->pub_joint_cmd[9] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/RR_hip_controller/command", 1);
-    this->pub_joint_cmd[10] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/RR_thigh_controller/command", 1);
-    this->pub_joint_cmd[11] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/RR_calf_controller/command", 1);
+    this->pub_joint_cmd[6] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/RR_hip_controller/command", 1);
+    this->pub_joint_cmd[7] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/RR_thigh_controller/command", 1);
+    this->pub_joint_cmd[8] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/RR_calf_controller/command", 1);
+    this->pub_joint_cmd[9] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/RL_hip_controller/command", 1);
+    this->pub_joint_cmd[10] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/RL_thigh_controller/command", 1);
+    this->pub_joint_cmd[11] = this->nh_.advertise<unitree_legged_msgs::MotorCmd>("/a1_gazebo/RL_calf_controller/command", 1);
 
-    this->motor_sub_ = this->nh_.subscribe("/quad/motor_info", 1000, &FSM::MotorCallback ,this);
-    this->imu_sub_ = this->nh_.subscribe("/body_imu", 1000, &FSM::IMUCallback, this);
-    this->joy_sub_ = this->nh_.subscribe("/joy", 1000, &FSM::JoyCallback, this);
+    this->motor_sub_ = this->nh_.subscribe("/quad/motor_info", 2, &FSM::MotorCallback ,this);
+    this->imu_sub_ = this->nh_.subscribe("/body_imu", 2, &FSM::IMUCallback, this);
+    this->joy_sub_ = this->nh_.subscribe("/joy", 2, &FSM::JoyCallback, this);
 
     this->sub_joint_msg[0] = this->nh_.subscribe("/a1_gazebo/FL_hip_controller/state", 2, &FSM::FL_hip_state_callback, this);
     this->sub_joint_msg[1] = this->nh_.subscribe("/a1_gazebo/FL_thigh_controller/state", 2, &FSM::FL_thigh_state_callback, this);
@@ -105,12 +109,18 @@ FSM::FSM(ros::NodeHandle &nh) {
     this->sub_joint_msg[3] = this->nh_.subscribe("/a1_gazebo/FR_hip_controller/state", 2, &FSM::FR_hip_state_callback, this);
     this->sub_joint_msg[4] = this->nh_.subscribe("/a1_gazebo/FR_thigh_controller/state", 2, &FSM::FR_thigh_state_callback, this);
     this->sub_joint_msg[5] = this->nh_.subscribe("/a1_gazebo/FR_calf_controller/state", 2, &FSM::FR_calf_state_callback, this);
-    this->sub_joint_msg[6] = this->nh_.subscribe("/a1_gazebo/RL_hip_controller/state", 2, &FSM::RL_hip_state_callback, this);
-    this->sub_joint_msg[7] = this->nh_.subscribe("/a1_gazebo/RL_thigh_controller/state", 2, &FSM::RL_thigh_state_callback, this);
-    this->sub_joint_msg[8] = this->nh_.subscribe("/a1_gazebo/RL_calf_controller/state", 2, &FSM::RL_calf_state_callback, this);
-    this->sub_joint_msg[9] = this->nh_.subscribe("/a1_gazebo/RR_hip_controller/state", 2, &FSM::RR_hip_state_callback, this);
-    this->sub_joint_msg[10] = this->nh_.subscribe("/a1_gazebo/RR_thigh_controller/state", 2, &FSM::RR_thigh_state_callback, this);
-    this->sub_joint_msg[11] = this->nh_.subscribe("/a1_gazebo/RR_calf_controller/state", 2, &FSM::RR_calf_state_callback, this);
+    this->sub_joint_msg[6] = this->nh_.subscribe("/a1_gazebo/RR_hip_controller/state", 2, &FSM::RR_hip_state_callback, this);
+    this->sub_joint_msg[7] = this->nh_.subscribe("/a1_gazebo/RR_thigh_controller/state", 2, &FSM::RR_thigh_state_callback, this);
+    this->sub_joint_msg[8] = this->nh_.subscribe("/a1_gazebo/RR_calf_controller/state", 2, &FSM::RR_calf_state_callback, this);
+    this->sub_joint_msg[9] = this->nh_.subscribe("/a1_gazebo/RL_hip_controller/state", 2, &FSM::RL_hip_state_callback, this);
+    this->sub_joint_msg[10] = this->nh_.subscribe("/a1_gazebo/RL_thigh_controller/state", 2, &FSM::RL_thigh_state_callback, this);
+    this->sub_joint_msg[11] = this->nh_.subscribe("/a1_gazebo/RL_calf_controller/state", 2, &FSM::RL_calf_state_callback, this);
+
+
+    this->sub_foot_contact_msg[0] = this->nh_.subscribe("/visual/FL_foot_contact/the_force", 2, &FSM::FL_foot_contact_callback, this);
+    this->sub_foot_contact_msg[1] = this->nh_.subscribe("/visual/FR_foot_contact/the_force", 2, &FSM::FR_foot_contact_callback, this);
+    this->sub_foot_contact_msg[2] = this->nh_.subscribe("/visual/RL_foot_contact/the_force", 2, &FSM::RL_foot_contact_callback, this);
+    this->sub_foot_contact_msg[3] = this->nh_.subscribe("/visual/RR_foot_contact/the_force", 2, &FSM::RR_foot_contact_callback, this);
 
 
     this->state_interior_.Reset();
@@ -130,6 +140,7 @@ FSM::~FSM() {
         delete each;
     }
     delete this->model_StateEstimate;
+    delete this->model_A1Estimate;
     delete this->model_LegController;
 }
 
@@ -141,13 +152,15 @@ void FSM::loop(const ros::TimerEvent &) {
             this->state_interior_.cur_position << 0, 0, 0.345;
             this->state_interior_.cur_vel << 0, 0, 0;
             this->model_LegController->FirstUpdateData(&this->state_interior_);
+            //this->model_A1Estimate->init_state(this->state_interior_);
         }
         this->flow++;
         if(this->flow == this->Workers.size()){
             ROS_INFO("Finish ScheduleTable");
             exit(0);
         }
-    }else{
+    }
+    else{
         if(this->state_interior_.gait_type != quad::STAND){
             /*! Update data for state estimate */
             this->model_StateEstimate->UpdateOrientationData(this->state_interior_);
@@ -158,6 +171,8 @@ void FSM::loop(const ros::TimerEvent &) {
             /*! Update Leg Control Data and Command */
             Update_LegController();
             Update_StateEstimate();
+            //this->mpc_solver.update_plan(this->state_interior_, this->state_interior_.plan_dt);
+            //this->mpc_solver.generate_swing_legs_ctrl(this->state_interior_, this->state_interior_.plan_dt);
             /*! Convex MPC -> Calculate contact force */
             this->state_interior_.foot_contact_force = this->mpc_solver.Calculate_contact_force(this->state_interior_);
             //std::cout << this->state_interior_.foot_contact_force << std::endl;
@@ -213,6 +228,13 @@ void FSM::build_ScheduleTable(int Schedule, ...) {
 }
 
 void FSM::Update_LegController(){
+    /*! Update feedback */
+    for (int foot = 0; foot < 4; foot++) {
+        for (int joint = 0; joint < 3; joint++) {
+            this->model_LegController->leg_data_[foot].q(joint) = this->state_interior_.joint_position(foot*3+joint);
+            this->model_LegController->leg_data_[foot].qd(joint) = this->state_interior_.joint_velocity(foot*3+joint);
+        }
+    }
     for (int foot = 0; foot < 4; foot++) {
         this->model_LegController->leg_command_[foot].pDes =
                 this->state_interior_.foot_pDes.block<3, 1>(0, foot);
@@ -225,13 +247,6 @@ void FSM::Update_LegController(){
                 this->model_LegController->leg_command_[foot].qDes;
         this->state_interior_.foot_qdDes.block<3, 1>(0, foot) =
                 this->model_LegController->leg_command_[foot].qdDes;
-    }
-    /*! Update feedback */
-    for (int foot = 0; foot < 4; foot++) {
-        for (int joint = 0; joint < 3; joint++) {
-            this->model_LegController->leg_data_[foot].q(joint) = this->state_interior_.joint_position(foot*3+joint);
-            this->model_LegController->leg_data_[foot].qd(joint) = this->state_interior_.joint_velocity(foot*3+joint);
-        }
     }
     this->model_LegController->UpdateData();
     /*! Update foot */
@@ -250,16 +265,16 @@ void FSM::Update_LegController(){
                 this->model_LegController->leg_data_[foot].J_inv;
 
 
-        /*! add robot state to get foot position in world frame*/
+        /*! add robot state to get foot position and velocity in world frame*/
         this->state_interior_.foot_p_abs.block<3, 1>(0, foot) =
                 this->state_interior_.rotate_matrix
                         * this->state_interior_.foot_p_robot.block<3, 1>(0, foot);
+
         this->state_interior_.foot_p.block<3, 1>(0, foot) =
                 this->state_interior_.foot_p_abs.block<3, 1>(0, foot)
                         + this->state_interior_.cur_position;
 
         /*! Update Params that control swing Legs */
-
         this->state_interior_.foot_forces_swing.block<3, 1>(0, foot) =
                 (this->state_interior_.foot_pDes.block<3, 1>(0, foot)
                  -this->state_interior_.foot_p_robot.block<3, 1>(0, foot)).cwiseProduct(this->state_interior_.kp_foot.block<3, 1>(0, foot))
@@ -276,7 +291,11 @@ void FSM::Update_StateEstimate() {
                                         this->state_interior_.phase_variable);
 
     this->state_interior_.estimate_position = this->model_StateEstimate->getPosition();
+    this->state_interior_.estimate_position.z() = 0.345;
     this->state_interior_.estimate_vel = this->model_StateEstimate->getVelocity();
+
+    //this->model_A1Estimate->update_estimation(this->state_interior_, this->state_interior_.plan_dt);
+
     /*! Update interior msg */
     this->state_interior_.cur_position = this->state_interior_.estimate_position;
     this->state_interior_.cur_vel = this->state_interior_.estimate_vel;
@@ -308,8 +327,8 @@ void FSM::SendCommand(){
     // send control cmd to robot via ros topic
     unitree_legged_msgs::LowCmd low_cmd;
     for (int i = 0; i < 4; i++) {
-        //if(this->state_interior_.contacts[i] == 0){
-        if(1){
+        if(0){
+            /*! Position Control Without MPC */
                 low_cmd.motorCmd[3*i].mode = 0x0A;
                 low_cmd.motorCmd[3*i].q = 0;
                 low_cmd.motorCmd[3*i].dq = 0;
@@ -331,41 +350,36 @@ void FSM::SendCommand(){
                 low_cmd.motorCmd[3*i+2].Kd = 15;
                 low_cmd.motorCmd[3*i+2].tau = 0;
 
+
         }
         else {
+            /*! MPC Torques Control */
             low_cmd.motorCmd[3 * i].mode = 0x0A;
-            low_cmd.motorCmd[3 * i].q = 0;
+            low_cmd.motorCmd[3 * i].q = this->state_interior_.joint_torques(3*i, 0);
             low_cmd.motorCmd[3 * i].dq = 0;
-            low_cmd.motorCmd[3 * i].Kp = 70;
-            low_cmd.motorCmd[3 * i].Kd = 3;
+            low_cmd.motorCmd[3 * i].Kp = 0;
+            low_cmd.motorCmd[3 * i].Kd = 0;
             low_cmd.motorCmd[3 * i].tau = 0;
 
             low_cmd.motorCmd[3 * i + 1].mode = 0x0A;
-            low_cmd.motorCmd[3 * i + 1].q = 0;
+            low_cmd.motorCmd[3 * i + 1].q = this->state_interior_.foot_qDes(1, i);
             low_cmd.motorCmd[3 * i + 1].dq = 0;
             low_cmd.motorCmd[3 * i + 1].Kp = 0;
             low_cmd.motorCmd[3 * i + 1].Kd = 0;
             low_cmd.motorCmd[3 * i + 1].tau = this->state_interior_.joint_torques(3*i+1, 0);
 
             low_cmd.motorCmd[3 * i + 2].mode = 0x0A;
-            low_cmd.motorCmd[3 * i + 2].q = 0;
+            low_cmd.motorCmd[3 * i + 2].q = this->state_interior_.foot_qDes(2, i);
             low_cmd.motorCmd[3 * i + 2].dq = 0;
             low_cmd.motorCmd[3 * i + 2].Kp = 0;
             low_cmd.motorCmd[3 * i + 2].Kd = 0;
             low_cmd.motorCmd[3 * i + 2].tau = this->state_interior_.joint_torques(3*i+2, 0);
         }
-//        low_cmd.motorCmd[i].tau = this->state_interior_.joint_torques(i, 0);
     }
-    for (int i = 0; i < 6; i++) {
+
+    for (int i = 0; i < 12; i++) {
         pub_joint_cmd[i].publish(low_cmd.motorCmd[i]);
     }
-    pub_joint_cmd[6].publish(low_cmd.motorCmd[9]);
-    pub_joint_cmd[7].publish(low_cmd.motorCmd[10]);
-    pub_joint_cmd[8].publish(low_cmd.motorCmd[11]);
-    pub_joint_cmd[9].publish(low_cmd.motorCmd[6]);
-    pub_joint_cmd[10].publish(low_cmd.motorCmd[7]);
-    pub_joint_cmd[11].publish(low_cmd.motorCmd[8]);
-
 }
 
 void FSM::MotorCallback(const std_msgs::Float64MultiArray &msg) {
@@ -411,7 +425,7 @@ void FSM::IMUCallback(const sensor_msgs::Imu &msg) {
 }
 
 void FSM::JoyCallback(const sensor_msgs::Joy &msg) {
-    this->state_interior_.command_vel.x() = msg.axes[1]*0.5;
+    this->state_interior_.command_vel.x() = msg.axes[1] * 0.2;
     this->state_interior_.command_rpy << 0,0,0;
 }
 
@@ -443,32 +457,51 @@ void FSM::FR_calf_state_callback(const unitree_legged_msgs::MotorState &joint_st
     this->state_interior_.joint_velocity[5] = joint_state.dq;
 }
 
-// RL
-void FSM::RL_hip_state_callback(const unitree_legged_msgs::MotorState &joint_state) {
+// RR
+void FSM::RR_hip_state_callback(const unitree_legged_msgs::MotorState &joint_state) {
     this->state_interior_.joint_position[6] = joint_state.q;
     this->state_interior_.joint_velocity[6] = joint_state.dq;
 }
-void FSM::RL_thigh_state_callback(const unitree_legged_msgs::MotorState &joint_state) {
+void FSM::RR_thigh_state_callback(const unitree_legged_msgs::MotorState &joint_state) {
     this->state_interior_.joint_position[7] = joint_state.q;
     this->state_interior_.joint_velocity[7] = joint_state.dq;
 }
-void FSM::RL_calf_state_callback(const unitree_legged_msgs::MotorState &joint_state) {
+void FSM::RR_calf_state_callback(const unitree_legged_msgs::MotorState &joint_state) {
     this->state_interior_.joint_position[8] = joint_state.q;
     this->state_interior_.joint_velocity[8] = joint_state.dq;
 }
 
-// RR
-void FSM::RR_hip_state_callback(const unitree_legged_msgs::MotorState &joint_state) {
+// RL
+void FSM::RL_hip_state_callback(const unitree_legged_msgs::MotorState &joint_state) {
     this->state_interior_.joint_position[9] = joint_state.q;
     this->state_interior_.joint_velocity[9] = joint_state.dq;
 }
-void FSM::RR_thigh_state_callback(const unitree_legged_msgs::MotorState &joint_state) {
+void FSM::RL_thigh_state_callback(const unitree_legged_msgs::MotorState &joint_state) {
     this->state_interior_.joint_position[10] = joint_state.q;
     this->state_interior_.joint_velocity[10] = joint_state.dq;
 }
-void FSM::RR_calf_state_callback(const unitree_legged_msgs::MotorState &joint_state) {
+void FSM::RL_calf_state_callback(const unitree_legged_msgs::MotorState &joint_state) {
     this->state_interior_.joint_position[11] = joint_state.q;
     this->state_interior_.joint_velocity[11] = joint_state.dq;
 }
+
+// foot contact force
+void FSM::FL_foot_contact_callback(const geometry_msgs::WrenchStamped &force) {
+    this->state_interior_.foot_force[0] = force.wrench.force.z;
+}
+
+void FSM::FR_foot_contact_callback(const geometry_msgs::WrenchStamped &force) {
+    this->state_interior_.foot_force[1] = force.wrench.force.z;
+}
+
+void FSM::RL_foot_contact_callback(const geometry_msgs::WrenchStamped &force) {
+    this->state_interior_.foot_force[2] = force.wrench.force.z;
+}
+
+void FSM::RR_foot_contact_callback(const geometry_msgs::WrenchStamped &force) {
+    this->state_interior_.foot_force[3] = force.wrench.force.z;
+}
+
+
 
 #endif
