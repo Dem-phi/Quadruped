@@ -81,10 +81,9 @@ struct GaitData{
 };
 
 class GaitScheduler{
-private:
+public:
     double dt_, dphase_;
 
-public:
     // Parameters for modify gait
     double period_time_natural_, switching_phase_natural_;
     GaitData gait_data_;
@@ -187,7 +186,7 @@ public:
                 //解决初始迭代问题
                 this->gait_data_.initial_phase_ = -0.02;
                 this->gait_data_.switching_phase_nominal_ = 0.5;
-                this->gait_data_.phase_offset_ << 0, 0.5, 0, 0.5;
+                this->gait_data_.phase_offset_ << 0, 0.5, 0.5, 0;
                 this->gait_data_.phase_scale_ << 1.0, 1.0, 1.0, 1.0;
                 break;
         }

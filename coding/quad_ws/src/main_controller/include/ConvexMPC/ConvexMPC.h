@@ -18,8 +18,10 @@ public:
     /*! Weight Matrix*/
     Eigen::Matrix<double, MPC_STATE_DIM*PLAN_HORIZON, 1> q_weights_mpc;
     Eigen::Matrix<double, NUM_DOF*PLAN_HORIZON, 1> r_weights_mpc;
-    Eigen::MatrixXd Q;
-    Eigen::MatrixXd R;
+    //Eigen::MatrixXd Q;
+    //Eigen::MatrixXd R;
+    Eigen::DiagonalMatrix<double, MPC_STATE_DIM * PLAN_HORIZON> Q;
+    Eigen::DiagonalMatrix<double, NUM_DOF * PLAN_HORIZON> R;
     Eigen::SparseMatrix<double> Q_sparse;
     Eigen::SparseMatrix<double> R_sparse;
 
@@ -49,9 +51,6 @@ public:
 
     ConvexMPC(Eigen::VectorXd &_q_weights, Eigen::VectorXd &_r_weights){
         this->mu = 0.3;
-        this->Q.resize(MPC_STATE_DIM * PLAN_HORIZON, MPC_STATE_DIM * PLAN_HORIZON);
-        this->R.resize(NUM_DOF * PLAN_HORIZON, NUM_DOF * PLAN_HORIZON);
-
         //reserve size for sparse matrix
         this->Q_sparse = Eigen::SparseMatrix<double>(MPC_STATE_DIM*PLAN_HORIZON,
                                                      MPC_STATE_DIM*PLAN_HORIZON);
@@ -64,10 +63,8 @@ public:
         for (int i = 0; i < PLAN_HORIZON; i++) {
             this->q_weights_mpc.segment(i*MPC_STATE_DIM, MPC_STATE_DIM) = _q_weights;
         }
-        /*! why should multiply 2 ? */
-        for (int i = 0; i < MPC_STATE_DIM * PLAN_HORIZON; i++) {
-            this->Q(i,i) = 2*this->q_weights_mpc(i);
-        }
+        /*! why should multiply 2 ?*/
+        this->Q.diagonal() = 2*this->q_weights_mpc;
         for (int i = 0; i < MPC_STATE_DIM*PLAN_HORIZON ; i++) {
             this->Q_sparse.insert(i, i) = 2*this->q_weights_mpc(i);
         }
@@ -76,10 +73,7 @@ public:
         for (int i = 0; i < PLAN_HORIZON; i++) {
             this->r_weights_mpc.segment(i*NUM_DOF, NUM_DOF) = _r_weights;
         }
-        //this->R.diagonal() = 2*this->r_weights_mpc;
-        for (int i = 0; i < NUM_DOF * PLAN_HORIZON; i++) {
-            this->R(i, i) = 2*this->r_weights_mpc(i);
-        }
+        this->R.diagonal() = 2*this->r_weights_mpc;
         for (int i = 0; i < PLAN_HORIZON*NUM_DOF; i++) {
             this->R_sparse.insert(i, i) = 2*this->r_weights_mpc(i);
         }
@@ -163,21 +157,22 @@ public:
     /*! Update qp matrix*/
     void Calculate_qp(STATE_INTERIOR &state){
         // calculate A_qp and B_qp
-        for (int i = 0; i < PLAN_HORIZON; i++) {
-            if(i==0){
-                this->A_qp.block<MPC_STATE_DIM, MPC_STATE_DIM>(MPC_STATE_DIM * i, 0) = A_mat_d;
-            }else{
-                this->A_qp.block<MPC_STATE_DIM, MPC_STATE_DIM>(MPC_STATE_DIM * i, 0) =
-                this->A_qp.block<MPC_STATE_DIM, MPC_STATE_DIM>(MPC_STATE_DIM * (i-1), 0) * A_mat_d;
+        for (int i = 0; i < PLAN_HORIZON; ++i) {
+            if (i == 0) {
+                A_qp.block<MPC_STATE_DIM, MPC_STATE_DIM>(MPC_STATE_DIM * i, 0) = A_mat_d;
             }
-            for (int j = 0; j < i+1; j++) {
-                if(i-j==0){
-                    this->B_qp.block<MPC_STATE_DIM, NUM_DOF>(MPC_STATE_DIM*i, NUM_DOF*j) =
-                            this->B_mat_d_list.block<MPC_STATE_DIM, NUM_DOF>(j*MPC_STATE_DIM, 0);
-                }else{
-                    this->B_qp.block<MPC_STATE_DIM, NUM_DOF>(MPC_STATE_DIM*i, NUM_DOF*j) =
-                            this->A_qp.block<MPC_STATE_DIM, MPC_STATE_DIM>(MPC_STATE_DIM*(i-j-1), 0)
-                                    * this->B_mat_d_list.block<MPC_STATE_DIM, NUM_DOF>(j*MPC_STATE_DIM, 0);
+            else {
+                A_qp.block<MPC_STATE_DIM, MPC_STATE_DIM>(MPC_STATE_DIM * i, 0) =
+                        A_qp.block<MPC_STATE_DIM, MPC_STATE_DIM>(MPC_STATE_DIM * (i-1), 0)*A_mat_d;
+            }
+            for (int j = 0; j < i + 1; ++j) {
+                if (i-j == 0) {
+                    B_qp.block<MPC_STATE_DIM, NUM_DOF>(MPC_STATE_DIM * i, NUM_DOF * j) =
+                            B_mat_d_list.block<MPC_STATE_DIM, NUM_DOF>(j * MPC_STATE_DIM, 0);
+                } else {
+                    B_qp.block<MPC_STATE_DIM, NUM_DOF>(MPC_STATE_DIM * i, NUM_DOF * j) =
+                            A_qp.block<MPC_STATE_DIM, MPC_STATE_DIM>(MPC_STATE_DIM * (i-j-1), 0)
+                            * B_mat_d_list.block<MPC_STATE_DIM, NUM_DOF>(j * MPC_STATE_DIM, 0);
                 }
             }
         }
@@ -185,7 +180,8 @@ public:
         // transform to QP Problems
         // Calculate Hessian
         Eigen::Matrix<double, NUM_DOF*PLAN_HORIZON, NUM_DOF*PLAN_HORIZON> dense_hessian;
-        dense_hessian = (this->B_qp.transpose() * this->Q * this->B_qp) + this->R;
+        dense_hessian = (this->B_qp.transpose() * this->Q * this->B_qp);
+        dense_hessian += this->R;
         this->hessian = dense_hessian.sparseView();
 
         // calculate gradient

@@ -58,24 +58,20 @@ class STATE_INTERIOR{
 
         void Reset(){
             /*! For test parameters */
-            movement_mode = 1;  // 0: standstill, 1: start to locomote
-            counter_per_gait = 120 * 2;
+            counter_per_gait = 240;
             counter_per_swing = 120;
             counter = 0;
             gait_counter.setZero();
-            gait_counter_speed.setZero();
-            foot_pos_target_world.setZero();
-            foot_pos_target_abs.setZero();
-            foot_pos_target_rel.setZero();
             foot_pos_start.setZero();
             foot_pos_rel_last_time.setZero();
             foot_pos_target_last_time.setZero();
-            foot_pos_cur.setZero();
+            gait_counter_reset();
+//            gait_counter_speed << 1.5, 1.5, 1.5, 1.5 ;
+            gait_counter_speed << 2, 2, 2, 2 ;
 
 
 
-
-            robot_mass = 13.0;
+            robot_mass = 12.0;
             inertia_tensor << 0.0158533, 0.0, 0.0,
                     0.0, 0.0377999, 0.0,
                     0.0, 0.0, 0.0456542;
@@ -83,15 +79,18 @@ class STATE_INTERIOR{
             gait_type = STAND;
             leg_control_type = 1;
 
-            plan_dt = 0.01;
+            plan_dt = 0.0025;
 
+            command_position << 0,0,0.32;
             command_vel.setZero();
+            command_vel_b.setZero();
             command_angle_vel.setZero();
             command_rpy.setZero();
 
 
             cur_position.setZero();
             cur_vel.setZero();
+            cur_vel_b.setZero();
             b_angle_vel.setZero();
             w_angle_vel.setZero();
             cur_rpy.setZero();
@@ -99,6 +98,8 @@ class STATE_INTERIOR{
 
             quaternion.setIdentity();
             rotate_matrix.setZero();
+            rotate_matrix_z.setZero();
+
 
             foot_force.setZero();
             foot_contact_force.setZero();
@@ -109,12 +110,15 @@ class STATE_INTERIOR{
             foot_p_abs.setZero();
             foot_v.setZero();
             foot_v_robot.setZero();
+            foot_v_abs.setZero();
             foot_q.setZero();
             foot_qd.setZero();
             foot_jacobian.setZero();
             foot_jacobian_inv.setZero();
 
             foot_pDes.setZero();
+            foot_pDes_robot.setZero();
+            foot_pDes_abs.setZero();
             foot_vDes.setZero();
             foot_qDes.setZero();
             foot_qdDes.setZero();
@@ -179,39 +183,31 @@ class STATE_INTERIOR{
                 if(foot == 0 || foot == 1){
                     foot_p_bias.block<3, 1>(0, foot).x() = X_OFFSET;
                 }else{
-                    foot_p_bias.block<3, 1>(0, foot).x() = -X_OFFSET+0.08;
+                    foot_p_bias.block<3, 1>(0, foot).x() = -X_OFFSET;
                 }
-                if(foot == 0 || foot == 3){
+                if(foot == 0 || foot == 2){
                     foot_p_bias.block<3, 1>(0, foot).y() = Y_OFFSET;
                 }else{
                     foot_p_bias.block<3, 1>(0, foot).y() = -Y_OFFSET;
                 }
-                foot_p_bias.block<3, 1>(0, foot).z() = -0.345;
+                foot_p_bias.block<3, 1>(0, foot).z() = -0.33;
             }
         }
 
         void gait_counter_reset() {
-            if (gait_type == 1) {
-                gait_counter << 0, 120, 120, 0;
-            }
+            gait_counter << 0, 120, 120, 0;
         }
 
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         /*! For test parameters */
-        int movement_mode;  // 0: standstill, 1: start to locomote
-        int counter_per_plan;
         double counter_per_gait;
         double counter_per_swing;
         int counter;
         Eigen::Vector4d gait_counter;
         Eigen::Vector4d gait_counter_speed;
-        Eigen::Matrix<double, 3, NUM_LEG> foot_pos_target_world; // in the world frame
-        Eigen::Matrix<double, 3, NUM_LEG> foot_pos_target_abs; // in a frame which centered at the robot frame's origin but parallels to the world frame
-        Eigen::Matrix<double, 3, NUM_LEG> foot_pos_target_rel; // in the robot frame
         Eigen::Matrix<double, 3, NUM_LEG> foot_pos_start;
         Eigen::Matrix<double, 3, NUM_LEG> foot_pos_rel_last_time;
         Eigen::Matrix<double, 3, NUM_LEG> foot_pos_target_last_time;
-        Eigen::Matrix<double, 3, NUM_LEG> foot_pos_cur;
 
 
     /*! interior params */
@@ -220,19 +216,22 @@ class STATE_INTERIOR{
 
         /*! Gait Type*/
         STATE_TYPE gait_type;
-        int leg_control_type; // 0->Stand/QP ; 1->other gait /MPC
+        int leg_control_type;
 
         /*! Control Frequency */
         double plan_dt;
 
         /*! Command from Joy */
+        Eigen::Vector3d command_position;
         Eigen::Vector3d command_vel;
+        Eigen::Vector3d command_vel_b;
         Eigen::Vector3d command_angle_vel;
         Eigen::Vector3d command_rpy;
 
         /*! Current State */
         Eigen::Vector3d cur_position;
         Eigen::Vector3d cur_vel;
+        Eigen::Vector3d cur_vel_b;
         Eigen::Vector3d b_angle_vel; // in robot frame
         Eigen::Vector3d w_angle_vel; // in world frame
         Eigen::Vector3d cur_rpy;
@@ -242,6 +241,7 @@ class STATE_INTERIOR{
         /*! Kinematic Parameters */
         Eigen::Quaterniond quaternion;
         Eigen::Matrix3d rotate_matrix;
+        Eigen::Matrix3d rotate_matrix_z;
 
         /*! Leg Controller Parameters */
         Eigen::Vector4d foot_force;
@@ -254,15 +254,19 @@ class STATE_INTERIOR{
         Eigen::Matrix<double, 3, NUM_LEG> foot_p_bias;
         Eigen::Matrix<double, 3, NUM_LEG> foot_v;
         Eigen::Matrix<double, 3, NUM_LEG> foot_v_robot;
+        Eigen::Matrix<double, 3, NUM_LEG> foot_v_abs;
         Eigen::Matrix<double, 3, NUM_LEG> foot_q;
         Eigen::Matrix<double, 3, NUM_LEG> foot_qd;
         Eigen::Matrix<double, 12, 12> foot_jacobian;
         Eigen::Matrix<double, 12, 12> foot_jacobian_inv;
         // Command in robot frame
         Eigen::Matrix<double, 3, NUM_LEG> foot_pDes;
+        Eigen::Matrix<double, 3, NUM_LEG> foot_pDes_robot;
+        Eigen::Matrix<double, 3, NUM_LEG> foot_pDes_abs;
         Eigen::Matrix<double, 3, NUM_LEG> foot_vDes;
         Eigen::Matrix<double, 3, NUM_LEG> foot_qDes;
         Eigen::Matrix<double, 3, NUM_LEG> foot_qdDes;
+
 
 
 

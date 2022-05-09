@@ -14,12 +14,12 @@ using namespace quad;
 
 class Solver{
 public:
-    BezierUtils bezierUtils[NUM_LEG];
-
     OsqpEigen::Solver solver;
     /*! QP Formation */
     Eigen::DiagonalMatrix<double, 6>Q;
     Eigen::Matrix<double, 3, NUM_LEG> last_force;
+    BezierUtils bezierUtils[NUM_LEG];
+
     double R;
     // ground friction coefficient
     double mu;
@@ -87,11 +87,16 @@ public:
         }
     }
 
+    /*! For Testing */
     void update_plan(STATE_INTERIOR &state, double dt) {
         state.counter += 1;
-        if (!state.movement_mode) {
+        if (1) {
             // movement_mode == 0, standstill with all feet in contact with ground
             for (bool &plan_contact: state.plan_contacts) plan_contact = true;
+            for (int i = 0; i < NUM_LEG; ++i) {
+                state.contacts[i] = 1;
+            }
+
             state.gait_counter_reset();
         } else {
             // movement_mode == 1, walk
@@ -99,9 +104,9 @@ public:
                 state.gait_counter(i) = state.gait_counter(i) + state.gait_counter_speed(i);
                 state.gait_counter(i) = std::fmod(state.gait_counter(i), state.counter_per_gait);
                 if (state.gait_counter(i) <= state.counter_per_swing) {
-                    state.plan_contacts[i] = true;
+                    state.contacts[i] = 1;
                 } else {
-                    state.plan_contacts[i] = false;
+                    state.contacts[i] = 0;
                 }
             }
         }
@@ -111,7 +116,7 @@ public:
         Eigen::Vector3d lin_vel_rel = state.rotate_matrix.transpose() * lin_vel_world; // robot body frame linear velocity
 
         // Raibert Heuristic, calculate foothold position
-        state.foot_pDes = state.foot_p_bias;
+        state.foot_pDes_robot = state.foot_p_bias;
         for (int i = 0; i < NUM_LEG; ++i) {
             double delta_x =
                     std::sqrt(std::abs(state.foot_p_bias(2)) / 9.8) * (lin_vel_rel(0) - state.command_vel(0)) +
@@ -135,14 +140,13 @@ public:
                 delta_y = FOOT_DELTA_Y_LIMIT;
             }
 
-            state.foot_pos_target_rel(0, i) += delta_x;
-            state.foot_pos_target_rel(1, i) += delta_y;
+            state.foot_pDes_robot(0, i) += delta_x;
+            state.foot_pDes_robot(1, i) += delta_y;
 
-            state.foot_pos_target_abs.block<3, 1>(0, i) = state.rotate_matrix * state.foot_pos_target_rel.block<3, 1>(0, i);
-            state.foot_pos_target_world.block<3, 1>(0, i) = state.foot_pos_target_abs.block<3, 1>(0, i) + state.cur_position;
+            state.foot_pDes_abs.block<3, 1>(0, i) = state.rotate_matrix * state.foot_pDes_robot.block<3, 1>(0, i);
+            state.foot_pDes.block<3, 1>(0, i) = state.foot_pDes_abs.block<3, 1>(0, i) + state.cur_position;
         }
     }
-
     void generate_swing_legs_ctrl(STATE_INTERIOR &state, double dt) {
         state.joint_torques.setZero();
 
@@ -158,12 +162,9 @@ public:
         Eigen::Matrix<double, 3, NUM_LEG> foot_pos_error;
         Eigen::Matrix<double, 3, NUM_LEG> foot_vel_error;
 
-        // the foot force of swing foot and stance foot, both are in robot frame
-        Eigen::Matrix<double, 3, NUM_LEG> foot_forces_swing;
-        Eigen::Matrix<double, 3, NUM_LEG> foot_forces_grf;
 
         for (int i = 0; i < NUM_LEG; ++i) {
-            foot_pos_cur.block<3, 1>(0, i) = state.rotate_matrix.transpose() * state.foot_p_abs.block<3, 1>(0, i);
+            foot_pos_cur.block<3, 1>(0, i) = state.foot_p_robot.block<3, 1>(0, i);
 
             // from foot_pos_cur to foot_pos_final computes an intermediate point using BezierUtils
             if (state.gait_counter(i) <= state.counter_per_swing) {
@@ -172,56 +173,30 @@ public:
                 // in this case the foot should be stance
                 // keep refreshing foot_pos_start in stance mode
                 state.foot_pos_start.block<3, 1>(0, i) = foot_pos_cur.block<3, 1>(0, i);
-            } else {
+            }
+            else {
                 // in this case the foot should be swing
-                spline_time(i) =
-                        float(state.gait_counter(i) - state.counter_per_swing) / float(state.counter_per_swing);
+                spline_time(i) = float(state.gait_counter(i) - state.counter_per_swing) / float(state.counter_per_swing);
             }
 
             foot_pos_target.block<3, 1>(0, i) = bezierUtils[i].get_foot_pos_curve(spline_time(i),
-                                                                                  state.foot_pos_start.block<3, 1>(0,
-                                                                                                                   i),
-                                                                                  state.foot_pos_target_rel.block<3, 1>(
-                                                                                          0, i),
+                                                                                  state.foot_pos_start.block<3, 1>(0, i),
+                                                                                  state.foot_pDes_robot.block<3, 1>(0, i),
                                                                                   0.0);
 
-            foot_vel_cur.block<3, 1>(0, i) =
-                    (foot_pos_cur.block<3, 1>(0, i) - state.foot_pos_rel_last_time.block<3, 1>(0, i)) / dt;
+            foot_vel_cur.block<3, 1>(0, i) = (foot_pos_cur.block<3, 1>(0, i) - state.foot_pos_rel_last_time.block<3, 1>(0, i)) / dt;
             state.foot_pos_rel_last_time.block<3, 1>(0, i) = foot_pos_cur.block<3, 1>(0, i);
 
-            foot_vel_target.block<3, 1>(0, i) =
-                    (foot_pos_target.block<3, 1>(0, i) - state.foot_pos_target_last_time.block<3, 1>(0, i)) / dt;
+            foot_vel_target.block<3, 1>(0, i) = (foot_pos_target.block<3, 1>(0, i) - state.foot_pos_target_last_time.block<3, 1>(0, i)) / dt;
             state.foot_pos_target_last_time.block<3, 1>(0, i) = foot_pos_target.block<3, 1>(0, i);
 
             foot_pos_error.block<3, 1>(0, i) = foot_pos_target.block<3, 1>(0, i) - foot_pos_cur.block<3, 1>(0, i);
             foot_vel_error.block<3, 1>(0, i) = foot_vel_target.block<3, 1>(0, i) - foot_vel_cur.block<3, 1>(0, i);
-            foot_forces_swing.block<3, 1>(0, i) =
-                    foot_pos_error.block<3, 1>(0, i).cwiseProduct(state.kp_foot.block<3, 1>(0, i)) +
-                    foot_vel_error.block<3, 1>(0, i).cwiseProduct(state.kd_foot.block<3, 1>(0, i));
+            state.foot_forces_swing.block<3, 1>(0, i) = foot_pos_error.block<3, 1>(0, i).cwiseProduct(state.kp_foot.block<3, 1>(0, i)) +
+                                                foot_vel_error.block<3, 1>(0, i).cwiseProduct(state.kd_foot.block<3, 1>(0, i));
         }
-        state.foot_pos_cur = foot_pos_cur;
-
-        // detect early contact
-        bool last_contacts[NUM_LEG];
-
-        for (int i = 0; i < NUM_LEG; ++i) {
-            if (state.gait_counter(i) <= state.counter_per_swing * 1.5) {
-                state.early_contacts[i] = false;
-            }
-            if (!state.plan_contacts[i] &&
-                (state.gait_counter(i) > state.counter_per_swing * 1.5) &&
-                (state.foot_force(i) > FOOT_FORCE_LOW)) {
-                state.early_contacts[i] = true;
-            }
-
-            // actual contact
-            last_contacts[i] = state.contacts[i];
-            state.contacts[i] = state.plan_contacts[i] || state.early_contacts[i];
-
-
-        }
-        state.foot_forces_swing = foot_forces_swing;
     }
+
 
     /*! Use contact force to Calculate joint torques */
     Eigen::Matrix<double, NUM_DOF, 1> Calculate_joint_torques(STATE_INTERIOR &stateInterior){
@@ -233,7 +208,7 @@ public:
         if(mpc_init_counter < 10){
             stateInterior.joint_torques = joint_torques;
         }else{
-            // for each leg, if it is a swing leg (contact[i] is false), use foot_force_kin getting joint_torque
+            // for each leg, if it is a swing leg (contact[i] is false), use foot_force_swing getting joint_torque
             // for each leg, if it is a stance leg (contact[i] is true), use foot_contact_force getting joint_torque
             for (int i = 0; i < NUM_LEG; i++) {
                 Eigen::Matrix3d jac = stateInterior.foot_jacobian.block<3, 3>(3 * i, 3 * i);
@@ -247,7 +222,6 @@ public:
                             stateInterior.foot_forces_swing.block<3, 1>(0, i));
                     // X = A.lu().solve(b)
                     joint_torques.segment<3>(i * 3) = jac.lu().solve(force_tgt); // LU分解, jac * tau = F
-                    //joint_torques.segment<3>(i*3) = jac.transpose() * force_tgt;
                 }
             }
             // add gravity compensation
@@ -262,7 +236,8 @@ public:
     }
 
     /*! Contact force -> [fx fy fz] * 4 */
-    Eigen::Matrix<double, 3, NUM_LEG> Calculate_contact_force(STATE_INTERIOR &stateInterior){
+    Eigen::Matrix<double, 3, NUM_LEG> Calculate_contact_force(STATE_INTERIOR &stateInterior, double dt){
+
         Eigen::Matrix<double, 3, NUM_LEG> foot_contact_force;
         Eigen::Vector3d rpy_error = stateInterior.command_rpy - stateInterior.cur_rpy;
         // limit euler error to pi/2
@@ -272,7 +247,7 @@ public:
             rpy_error(2) = stateInterior.command_rpy(2) + 3.1415926 * 2 - stateInterior.cur_rpy(2);
         }
         if(stateInterior.leg_control_type == 0){
-            // no use ???
+            // no use
         }
         else if (stateInterior.leg_control_type == 1){
             ConvexMPC mpc_solver = ConvexMPC(stateInterior.q_weights, stateInterior.r_weights);
@@ -285,10 +260,11 @@ public:
                 stateInterior.w_angle_vel.x(), stateInterior.w_angle_vel.y(), stateInterior.w_angle_vel.z(),
                 stateInterior.cur_vel.x(), stateInterior.cur_vel.y(), stateInterior.cur_vel.z(),
                 -9.8;
+            //std::cout << stateInterior.mpc_states << std::endl;
             // this should be roughly close to the average dt of main controller
-            double mpc_dt = 0.01;
+            double mpc_dt;
             // if in gazebo
-            mpc_dt = stateInterior.plan_dt;
+            mpc_dt = dt;
 
             // initialize the desired mpc states trajectory
             for (int i = 0; i < PLAN_HORIZON; i++) {
@@ -298,13 +274,14 @@ public:
                     stateInterior.cur_rpy.z() + stateInterior.command_angle_vel.z() * mpc_dt * (i+1),
                     stateInterior.cur_position.x() + stateInterior.command_vel.x() * mpc_dt * (i+1),
                     stateInterior.cur_position.y() + stateInterior.command_vel.y() * mpc_dt * (i+1),
-                    stateInterior.cur_position.z(), // desired position z = current position z
+                    stateInterior.command_position.z(),
                     stateInterior.command_angle_vel.x(),
                     stateInterior.command_angle_vel.y(),
                     stateInterior.command_angle_vel.z(),
                     stateInterior.command_vel.x(),
                     stateInterior.command_vel.y(),
-                    0, -9.8;
+                    0,
+                    -9.8;
             }
 
 
@@ -354,22 +331,14 @@ public:
             // Get Solution
             Eigen::VectorXd solution = solver.getSolution();
 
-            if(solution[0] > 20000){
-                std::cout << " Wrong contact force! " << std::endl;
-
-/*                std::cout << " foot_position   " << std::endl;
-                std::cout << stateInterior.foot_p_abs << std::endl;
-                std::cout << stateInterior.foot_p << std::endl;
-                std::cout << stateInterior.foot_p_robot << std::endl;
-                std::cout << stateInterior.foot_pDes << std::endl;*/
-            }
             for (int i = 0; i < NUM_LEG; i++) {
                 if(!isnan(solution.segment<3>(i*3).norm())){
                     foot_contact_force.block<3, 1>(0, i) = stateInterior.rotate_matrix.transpose() * solution.segment<3>(i*3);
                 }
             }
-            std::cout << stateInterior.foot_contact_force << std::endl;
+//            std::cout << stateInterior.foot_contact_force << std::endl;
         }
+        return foot_contact_force;
     }
 
 };

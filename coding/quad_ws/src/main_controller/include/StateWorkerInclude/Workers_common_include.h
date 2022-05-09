@@ -17,6 +17,7 @@
 #include "sensor_msgs/Imu.h"
 #include "geometry_msgs/WrenchStamped.h"
 
+#include "MathTools/filter.hpp"
 #include "Controllers/GaitScheduler.h"
 #include "Controllers/FootSwingTrajectory.h"
 #include "Controllers/LegController.h"
